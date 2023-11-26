@@ -3,7 +3,7 @@ name = "prosessed"
 authors = [
     { name = "Prosessed", email = "care@prosessed.com"}
 ]
-description = "Proseesed"
+description = "Prosessed"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
