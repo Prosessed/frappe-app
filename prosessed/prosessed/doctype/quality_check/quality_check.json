@@ -67,13 +67,13 @@
             "label": "Inspection Type",
             "oldfieldname": "inspection_type",
             "oldfieldtype": "Select",
-            "options": "\nIncoming\nOutgoing\nIn Process",
+            "options": "\nIncoming\nOutgoing\nIn Process"
         },
         {
             "fieldname": "reference_type",
             "fieldtype": "Select",
             "label": "Reference Type",
-            "options": "\nPurchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card",
+            "options": "\nPurchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card"
         },
         {
             "fieldname": "reference_name",
@@ -84,7 +84,7 @@
             "label": "Reference Name",
             "oldfieldname": "purchase_receipt_no",
             "oldfieldtype": "Link",
-            "options": "reference_type",
+            "options": "reference_type"
         },
         {
             "fieldname": "section_break_7",
@@ -198,7 +198,7 @@
             "no_copy": 1,
             "oldfieldname": "amended_from",
             "oldfieldtype": "Data",
-            "options": "Quality Inspection",
+            "options": "Quality Check",
             "print_hide": 1,
             "read_only": 1
         },
@@ -244,8 +244,8 @@
     "links": [],
     "modified": "2023-08-23 11:56:50.282878",
     "modified_by": "Administrator",
-    "module": "Stock",
-    "name": "Quality Inspection",
+    "module": "prosessed",
+    "name": "Quality Check",
     "naming_rule": "By \"Naming Series\" field",
     "owner": "Administrator",
     "permissions": [

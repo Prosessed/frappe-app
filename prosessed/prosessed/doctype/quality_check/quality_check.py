@@ -63,8 +63,10 @@ class QualityCheck(Document):
 		self.get_item_specification_details()
 
 	def on_submit(self):
+		pass
 
 	def on_cancel(self):
+		pass
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
