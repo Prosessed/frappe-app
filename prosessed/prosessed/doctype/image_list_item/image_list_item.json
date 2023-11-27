@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-28 00:56:33.070526",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image_detail_section",
+  "file"
+ ],
+ "fields": [
+  {
+   "fieldname": "image_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Image Detail"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Link",
+   "label": "File ",
+   "options": "File"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-28 01:01:56.918271",
+ "modified_by": "Administrator",
+ "module": "Prosessed",
+ "name": "Image List Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
