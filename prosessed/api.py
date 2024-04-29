@@ -13,7 +13,7 @@ def get_inspection_form_pdf(docname):
 	
 	return frappe.response
 
-@frappe.whitelist( allow_guest=True )
+@frappe.whitelist(allow_guest=True)
 def login(usr, pwd):
 	try:
 		login_manager = frappe.auth.LoginManager()
@@ -55,3 +55,39 @@ def generate_keys(user):
 	user_details.save()
 
 	return api_secret
+
+@frappe.whitelist(allow_guest=True)
+def signup(args):
+	data = {"message":""}
+	if not args["first_name"]:
+		data["message"] = "Name cannot be null"
+		return data
+
+	if not args["email"]:
+		data["message"] = "Email cannot be null"
+		return data
+
+	if not args["password"]:
+		data["message"] = "Password cannot be null"
+		return data
+
+	if frappe.db.get_value("User", args["email"]):
+		data["message"] = "Email Id Already Exists"
+		return data
+
+	user = frappe.new_doc("User")
+	user.email = args["email"]
+	user.first_name = args["first_name"]
+	user.send_welcome_email = 0
+	user.user_type = 'System User'
+	
+	if args["dob"]:
+		user.birth_date = args["dob"]
+	
+	user.save(ignore_permissions=True)
+	user.new_password = args["password"]
+	user.save(ignore_permissions = True)
+	user.add_roles('System Manager')
+	data["message"] = "Account Created, Please Login"
+	
+	return data
