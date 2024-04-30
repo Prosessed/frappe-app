@@ -9,9 +9,7 @@ def get_inspection_form_pdf(docname):
 	res["filecontent"] = pdf_file
 	res["type"] =  'pdf'
 
-	frappe.response.message = res
-	
-	return frappe.response
+	frappe.response["message"] = res
 
 @frappe.whitelist(allow_guest=True)
 def login(usr, pwd):
@@ -41,8 +39,6 @@ def login(usr, pwd):
 		"email":user.email
 	}
 
-
-
 def generate_keys(user):
 	user_details = frappe.get_doc('User', user)
 	api_secret = frappe.generate_hash(length=15)
@@ -57,37 +53,38 @@ def generate_keys(user):
 	return api_secret
 
 @frappe.whitelist(allow_guest=True)
-def signup(args):
+def signup(**kwargs):
 	data = {"message":""}
-	if not args["first_name"]:
+	if not kwargs["first_name"]:
 		data["message"] = "Name cannot be null"
 		return data
 
-	if not args["email"]:
+	if not kwargs["email"]:
 		data["message"] = "Email cannot be null"
 		return data
 
-	if not args["password"]:
+	if not kwargs["password"]:
 		data["message"] = "Password cannot be null"
 		return data
 
-	if frappe.db.get_value("User", args["email"]):
+	if frappe.db.get_value("User", kwargs["email"]):
 		data["message"] = "Email Id Already Exists"
 		return data
 
 	user = frappe.new_doc("User")
-	user.email = args["email"]
-	user.first_name = args["first_name"]
+	user.email = kwargs["email"]
+	user.first_name = kwargs["first_name"]
 	user.send_welcome_email = 0
 	user.user_type = 'System User'
-	
-	if args["dob"]:
-		user.birth_date = args["dob"]
-	
+
 	user.save(ignore_permissions=True)
-	user.new_password = args["password"]
+	user.new_password = kwargs["password"]
 	user.save(ignore_permissions = True)
 	user.add_roles('System Manager')
+
 	data["message"] = "Account Created, Please Login"
-	
-	return data
+
+	frappe.response["message"] = {
+		"success_key" : 1,
+		"message" : data["message"]
+	}
