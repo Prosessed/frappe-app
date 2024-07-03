@@ -33,6 +33,8 @@ app_license = "mit"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Server Script", "filters": [["module" , "in" , ("Prosessed")]]}]
+
 # Svg Icons
 # ------------------
 # include app icons in desk

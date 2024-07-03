@@ -1,0 +1,24 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Inspection Form",
+  "enabled": 1,
+  "modified": "2024-07-03 15:45:08.029475",
+  "module": "Prosessed",
+  "name": "Inspection Form-Client",
+  "script": "frappe.ui.form.on('Inspection Form', {\n\tinspection_template(frm) {\n\t\tif (cur_frm.doc.inspection_template) {\n\t\t//Inspection Parameter Listing\n\t\tfrappe.call({\n    method: \"frappe.client.get_list\",\n    args: {\n      doctype: \"Inspection Parameter Listing\",\n      filters: {\"parent\":cur_frm.doc.inspection_template,\"parenttype\":\"Inspection Template\"},\n      fields: [\"max_value\",\"min_value\",\"parameter_group\",\"parameter_type\",\"specification\"],\n              parent:\"Inspection Template\"\n    },\n    callback: function (r) {\n              if(r.message){\n                  console.log(r.message)\n                  frm.clear_table(\"readings\")\n                  for (let item of r.message){\n                      frm.add_child(\"readings\", item)\n                  }\n                  frm.refresh_field(\"readings\")\n              }\n            \n          }\n      })\n\t}\n\t}\n})",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Order",
+  "enabled": 1,
+  "modified": "2024-07-03 15:44:53.575841",
+  "module": "Prosessed",
+  "name": "Sales Order-Client",
+  "script": "frappe.ui.form.on('Sales Order', {\n\trefresh(frm) {\n\t    if (frm.doc.customer) {\n\t\t    frm.add_custom_button(__(\"Fetch Trend\"), () => {\n\t\t        frappe.call({\n\t\t            method : \"fetch_items\",\n\t\t            args : {\n\t\t                customer : frm.doc.customer\n\t\t            },\n\t\t            freeze : true,\n\t\t            freeze_message : \"Fetching Items..\",\n\t\t            callback : (r) => {\n\t\t                if (!r.exec) {\n\t\t                    if (frm.doc.items.length) {\n\t\t                        frm.clear_table(\"items\")\n\t\t                    }\n\t\t                    let item_list = r.message.item_list\n\t\t                    if (item_list.length) {\n\t\t                        for (let item of item_list) {\n\t\t                            let child_row = frm.add_child(\"items\", {\n\t\t                            \"item_code\" : item.item_code,\n\t\t                            \"qty\" : item.max_qty\n\t\t                            })\n\t\t                            frm.script_manager.trigger(\"item_code\", child_row.doctype, child_row.name)\n\t\t                        }\n\t\t                        frm.refresh_field(\"items\")\n\t\t                    }\n\t\t                }\n\t\t            }\n\t\t        })\n\t\t    })\n\t        \n\t    }\n\t},\n\tcustomer: (frm) => {\n\t    frm.trigger('refresh')\n\t}\n})",
+  "view": "Form"
+ }
+]
