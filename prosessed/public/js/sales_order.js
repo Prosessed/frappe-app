@@ -165,6 +165,9 @@ frappe.ui.form.on("Sales Order", {
             frm.item_group_field.toggle_label(false);
         }
         frm.$component.on('click', '.item-wrapper', function(){
+            if (!frm.doc.customer) {
+                frappe.throw(__("Please Specify Customer before Adding Items"))
+            }
             const $item = $(this);
 			const item_code = unescape($item.attr('data-item-code'));
 			let batch_no = unescape($item.attr('data-batch-no'));
