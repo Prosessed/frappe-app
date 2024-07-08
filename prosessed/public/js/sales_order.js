@@ -237,6 +237,7 @@ frappe.ui.form.on("Sales Order", {
             row.qty = qty
             row.uom = item[4];
             auto_fill_item_details(frm, item[0],row)
+            frm.script_manager.trigger("item_code", row.doctype, row.name)
             frm.refresh_field("items")
         }
         }
