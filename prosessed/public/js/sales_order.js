@@ -166,20 +166,7 @@ frappe.ui.form.on("Sales Order", {
 			let uom = unescape($item.attr('data-uom'));
 			const item_name = unescape($item.attr('title'));
 			let rate;
-            let qty;
-            frappe.prompt([
-                {
-                    fieldname: "qty",
-                    fieldtype: "Float",
-                    label: __("Quantity"),
-                    default: 0
-                }
-            ],
-            (data) => {
-                if (data.qty) {
-                    qty = data.qty
-                }
-            },__("Enter the Item Quantity"))
+            let qty = 0.0;
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
@@ -187,27 +174,39 @@ frappe.ui.form.on("Sales Order", {
 			uom = uom === "undefined" ? undefined : uom;
             // rate = rate === "undefined" ? undefined : rate;
 
-            frappe.call({
-            method:"erpnext.stock.utils.get_incoming_rate",
-            args:{"args": {
-            "item_code":item_code,
-            "posting_date":frm.doc.posting_date,
-            "posting_time":frm.doc.posting_time,
-            "warehouse":frm.doc.warehouse,
-            "company":frm.doc.company,
-            "qty":0,
-            "allow_zero_valuation":1
-            }},
-            async:false,
-            callback: function(res){
-                rate = res.message
-            }
-            })
-            add_item(qty,rate,item_code,item_name,batch_no,serial_no,uom)
+            frappe.prompt([
+                {
+                    fieldname: "qty",
+                    fieldtype: "Float",
+                    label: __("Quantity")
+                }
+            ],
+            (data) => {
+                if (data.qty) {
+                    qty = data.qty
+                }
+                frappe.call({
+                    method:"erpnext.stock.utils.get_incoming_rate",
+                    args:{"args": {
+                    "item_code":item_code,
+                    "posting_date":frm.doc.posting_date,
+                    "posting_time":frm.doc.posting_time,
+                    "warehouse":frm.doc.warehouse,
+                    "company":frm.doc.company,
+                    "qty":qty,
+                    "allow_zero_valuation":1
+                    }},
+                    async:false,
+                    callback: function(res){
+                        rate = res.message
+                    }
+                    })
+                    add_item(qty,rate,item_code,item_name,batch_no,serial_no,uom)
+            },__("Enter the Item Quantity"))
         })
 
         function add_item(qty,rate,...item){
-            console.log(item)
+            console.log(qty,item)
         let is_item = 0
         if (frm.doc.items){
             if (frm.doc.items.length == 1 && !frm.doc.items[0].item_code){
