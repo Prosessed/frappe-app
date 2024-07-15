@@ -1,5 +1,11 @@
 frappe.ui.form.on("Sales Order", {
     refresh : (frm) => {
+        if (frm.doc.docstatus !== 1){
+            frm.trigger("load_item_card")
+        }
+    },
+
+    load_item_card : (frm) => {
         var item_group, search_term;
         var wrapper = frm.get_field("custom_item_card").$wrapper;
           wrapper.html("")
