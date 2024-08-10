@@ -57,7 +57,7 @@ def get_items_from_item_group(item_group=None):
 
         if stock_data:
             stock_qty = stock_data[0].get('actual_qty')
-            for stock in list_of_stocks:
+            for stock in stock_data:
                 list_of_stocks.append({
                     "actual_qty" : stock.get('actual_qty'),
                     "warehouse" : stock.get('warehouse')
