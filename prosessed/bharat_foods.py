@@ -64,6 +64,7 @@ def get_items_from_item_group(item_group=None):
                 })
 
         items.append({
+            "item_code" :item_code,
             "item_name" : item_details.get('item_name'),
             "brand" : item_details.get('brand'),
             "item_image" : item_details.get('image'),
@@ -75,6 +76,3 @@ def get_items_from_item_group(item_group=None):
         })
 
     frappe.response["message"] = items
-
-
-
