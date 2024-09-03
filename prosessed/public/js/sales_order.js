@@ -133,9 +133,12 @@ frappe.ui.form.on("Sales Order", {
 
                     ${get_item_image_html()}
 
-                    <div class="item-detail" style = "height:fit-content !important; padding:0.5rem;">
+                    <div class="item-detail flex justify-center align-center" style = "height:fit-content !important; padding:0.5rem;">
                         <div class="item-name" style = "overflow:normal !important; white-space:normal !important;">
                             ${item.item_name}
+                        </div>
+                        <div class="item-price" style = "overflow:normal !important; white-space:normal !important;">
+                            <b>"$ ${item.price_list_rate || 0}"</b>
                         </div>
                     </div>
                 </div>`
