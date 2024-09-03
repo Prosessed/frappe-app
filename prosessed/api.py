@@ -267,7 +267,9 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
 
 			if source_warehouse:
+				frappe.log_error("source_warehouse", source_warehouse)
 				is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":source_warehouse},["actual_qty", "warehouse"])
+				frappe.log_error("is_qty_availble", is_qty_available)
 
 			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False,False]
 
@@ -283,7 +285,7 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 				{
 					"price_list_rate": item_price.get("price_list_rate"),
 					"currency": item_price.get("currency"),
-					"actual_qty": item_stock_qty,
+					"actual_qty": 147,
 					"warehouse": warehouse
 				}
 			)
