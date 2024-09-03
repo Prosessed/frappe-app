@@ -20,7 +20,8 @@ frappe.ui.form.on("Sales Order", {
     },
 
     load_item_card : (frm) => {
-        var item_group, search_term;
+        var item_group, search_term, warehouse;
+        warehouse = frm.doc.set_warehouse
         var wrapper = frm.get_field("custom_item_card").$wrapper;
           wrapper.html("")
           wrapper.append(
@@ -48,11 +49,11 @@ frappe.ui.form.on("Sales Order", {
         load_item_data();
         make_search_bar();
         function load_item_data() {
-            get_items({search_term}).then(({message}) => {
+            get_items({search_term, warehouse}).then(({message}) => {
                 render_item_list(message.items);
             });
         }
-        function get_items({start = 0, page_length = 40, search_term=''}) {
+        function get_items({start = 0, page_length = 40, search_term='', warehouse = ''}) {
             // const doc = this.events.get_frm().doc;
             // let { item_group, pos_profile } = this;
             // !item_group && (item_group = this.parent_item_group);
@@ -63,7 +64,7 @@ frappe.ui.form.on("Sales Order", {
             return frappe.call({
                 method: "prosessed.api.get_items",
                 freeze: true,
-                args: { start, page_length, item_group, search_term },
+                args: { start, page_length, item_group, search_term, warehouse },
             });
         }
 

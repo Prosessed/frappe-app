@@ -186,10 +186,11 @@ def get_conditions(search_term):
 	return condition
 
 @frappe.whitelist()
-def get_items(start, page_length, item_group, search_term=""):
+def get_items(start, page_length, item_group, search_term="", warehouse=""):
 	# warehouse, hide_unavailable_items = frappe.db.get_value(
 	# 	"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	# )
+
 	hide_unavailable_items =False
 	result = []
 
@@ -245,6 +246,7 @@ def get_items(start, page_length, item_group, search_term=""):
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
 		),
+		{"warehouse": warehouse},
 		as_dict=1,
 	)
 
