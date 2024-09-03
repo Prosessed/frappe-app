@@ -31,7 +31,7 @@ frappe.ui.form.on("Sales Order", {
 			`<div class="point-of-sale-app">
 			<section class="items-selector">
 				<div class="filter-section">
-					<div class="label">${__('Item Card')}</div>
+					<div class="label">${__('Items')}</div>
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
 				</div>
@@ -73,11 +73,15 @@ frappe.ui.form.on("Sales Order", {
 
         function render_item_list(items) {
             frm.$items_container.html('');
-
-            items.forEach(item => {
-                const item_html = get_item_html(item);
-                frm.$items_container.append(item_html);
-            });
+            if (items) {
+                items.forEach(item => {
+                    const item_html = get_item_html(item);
+                    frm.$items_container.append(item_html);
+                });
+            } else {
+                const no_items_html = `<div class="m-auto text-light">No items found.</div>`
+                frm.$items_container.append(no_items_html)
+            }
         }
 
         function get_item_html(item) {
