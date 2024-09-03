@@ -186,11 +186,10 @@ def get_conditions(search_term):
 	return condition
 
 @frappe.whitelist()
-def get_items(start, page_length, item_group, search_term="", source_warehouse=""):
+def get_items(start, page_length, item_group, search_term="", warehouse=""):
 	# warehouse, hide_unavailable_items = frappe.db.get_value(
 	# 	"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	# )
-
 	hide_unavailable_items =False
 	result = []
 
@@ -266,18 +265,16 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 			item_price = item_prices.get(item_code) or {}
 			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
 
-			if source_warehouse:
-				frappe.log_error("source_warehouse", source_warehouse)
-				is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":source_warehouse},["actual_qty", "warehouse"])
-				frappe.log_error("is_qty_availble", is_qty_available)
+			if warehouse:
+				is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":warehouse},["actual_qty", "warehouse"])
 
-			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False,False]
+			item_stock_qty, bin_warehouse = is_qty_available if is_qty_available else [False,False]
 
 			if not item_stock_qty:
 				item_stock_qty = 0
 
-			if not warehouse:
-				warehouse= None
+			if not bin_warehouse:
+				bin_warehouse= None
 
 			row = {}
 			row.update(item)
@@ -285,11 +282,10 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 				{
 					"price_list_rate": item_price.get("price_list_rate"),
 					"currency": item_price.get("currency"),
-					"actual_qty": 147,
-					"warehouse": warehouse
+					"actual_qty": item_stock_qty,
+					"warehouse": bin_warehouse
 				}
 			)
 			result.append(row)
-	import json
-	frappe.log_error(title="Get Items",message=json.dumps(result))
+
 	return {"items": result}
