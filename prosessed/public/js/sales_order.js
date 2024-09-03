@@ -138,7 +138,7 @@ frappe.ui.form.on("Sales Order", {
                             ${item.item_name}
                         </div>
                         <div class="item-price" style = "overflow:normal !important; white-space:normal !important;">
-                            <b>$ ${item.price_list_rate || 0}</b>
+                            <b>$ ${item.price_list_rate.toFixed(2) || 0.00}</b>
                         </div>
                     </div>
                 </div>`
