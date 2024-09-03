@@ -205,8 +205,8 @@ def get_items(start, page_length, item_group, search_term="", warehouse=""):
 	condition = get_conditions(search_term)
 	# condition += get_item_group_condition(pos_profile)
 	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
-	print("left and right :", lft, rgt)
 	bin_join_selection, bin_join_condition = "", ""
+
 	if hide_unavailable_items:
 		bin_join_selection = ", `tabBin` bin"
 		bin_join_condition = (
@@ -246,7 +246,6 @@ def get_items(start, page_length, item_group, search_term="", warehouse=""):
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
 		),
-		{"warehouse": warehouse},
 		as_dict=1,
 	)
 
@@ -265,10 +264,12 @@ def get_items(start, page_length, item_group, search_term="", warehouse=""):
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
-			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False, False]
+			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":warehouse},["actual_qty", "warehouse"])
+			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False,False]
+
 			if not item_stock_qty:
 				item_stock_qty = 0
+
 			if not warehouse:
 				warehouse= None
 

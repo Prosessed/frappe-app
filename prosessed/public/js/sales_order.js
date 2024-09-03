@@ -5,6 +5,9 @@ frappe.ui.form.on("Sales Order", {
         }
         frm.trigger('set_gross_profit_color')
     },
+    set_warehouse : (frm) => {
+        frm.trigger('load_item_card')
+    },
     set_gross_profit_color : (frm) => {
         const gross_profit = frm.doc.custom_gross_profit_
         let component = frm.get_field('custom_gross_profit_').$input_wrapper.find('.control-value')
@@ -21,7 +24,7 @@ frappe.ui.form.on("Sales Order", {
 
     load_item_card : (frm) => {
         var item_group, search_term, warehouse;
-        warehouse = frm.doc.set_warehouse
+        warehouse = frm.doc.set_warehouse;
         var wrapper = frm.get_field("custom_item_card").$wrapper;
           wrapper.html("")
           wrapper.append(
