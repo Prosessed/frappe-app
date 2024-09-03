@@ -263,7 +263,7 @@ def get_items(start, page_length, item_group, search_term=""):
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			is_qty_available =frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
+			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
 			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False, False]
 			if not item_stock_qty:
 				item_stock_qty = 0

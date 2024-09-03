@@ -3,6 +3,20 @@ frappe.ui.form.on("Sales Order", {
         if (frm.doc.docstatus !== 1){
             frm.trigger("load_item_card")
         }
+        frm.trigger('set_gross_profit_color')
+    },
+    set_gross_profit_color : (frm) => {
+        const gross_profit = frm.doc.custom_gross_profit_
+        let component = frm.get_field('custom_gross_profit_').$input_wrapper.find('.control-value')
+
+        if (gross_profit < 0) {
+            component.css('color', 'red')
+        } else if (gross_profit > 0 && gross_profit < 25) {
+            component.css('color', 'orange')
+        } else if (gross_profit > 25) {
+            component.css('color', 'green')
+        }
+
     },
 
     load_item_card : (frm) => {
@@ -89,7 +103,7 @@ frappe.ui.form.on("Sales Order", {
                         <div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-                        <div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+                        <div class="flex items-center justify-center h-75 border-b-grey text-6xl text-grey-100">
                             <img
                                 onerror="cur_pos.item_selector.handle_broken_image(this)"
                                 class="h-full item-img" src="${item_image}"
@@ -106,7 +120,7 @@ frappe.ui.form.on("Sales Order", {
             }
 
             return (
-                `<div class="item-wrapper"
+                `<div class="item-wrapper h-75 pt-3"
                     data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
                     data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
                     data-rate="${escape(price_list_rate || 0)}" data-warehouse="${escape(item.warehouse)}"
@@ -310,3 +324,10 @@ function auto_fill_item_details(frm,item_name,row){
 		}
 	})
 }
+
+frappe.ui.form.on("Sales Order Item", {
+    item_code: (frm, cdt, cdn) => {
+        frm.trigger('set_gross_profit_color')
+
+    }
+})

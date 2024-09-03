@@ -124,13 +124,11 @@ fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Proses
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Sales Order": {
+		"validate": "prosessed.crud_events.validate_sales_order",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
