@@ -264,7 +264,11 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":source_warehouse},["actual_qty", "warehouse"])
+			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code},["actual_qty", "warehouse"])
+
+			if source_warehouse:
+				is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":source_warehouse},["actual_qty", "warehouse"])
+
 			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False,False]
 
 			if not item_stock_qty:
@@ -284,5 +288,6 @@ def get_items(start, page_length, item_group, search_term="", source_warehouse="
 				}
 			)
 			result.append(row)
-	# print("items :", result)
+	import json
+	frappe.log_error(title="Get Items",message=json.dumps(result))
 	return {"items": result}
