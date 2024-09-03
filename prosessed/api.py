@@ -186,7 +186,7 @@ def get_conditions(search_term):
 	return condition
 
 @frappe.whitelist()
-def get_items(start, page_length, item_group, search_term="", warehouse=""):
+def get_items(start, page_length, item_group, search_term="", source_warehouse=""):
 	# warehouse, hide_unavailable_items = frappe.db.get_value(
 	# 	"POS Profile", pos_profile, ["warehouse", "hide_unavailable_items"]
 	# )
@@ -264,7 +264,7 @@ def get_items(start, page_length, item_group, search_term="", warehouse=""):
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":warehouse},["actual_qty", "warehouse"])
+			is_qty_available = frappe.db.get_value("Bin", {"item_code":item_code, "warehouse":source_warehouse},["actual_qty", "warehouse"])
 			item_stock_qty, warehouse = is_qty_available if is_qty_available else [False,False]
 
 			if not item_stock_qty:
