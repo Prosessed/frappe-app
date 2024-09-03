@@ -120,7 +120,8 @@ frappe.ui.form.on("Sales Order", {
             }
 
             return (
-                `<div class="item-wrapper h-75 pt-3"
+                `<div class="item-wrapper pt-3"
+                    style="height:14rem;"
                     data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
                     data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
                     data-rate="${escape(price_list_rate || 0)}" data-warehouse="${escape(item.warehouse)}"
