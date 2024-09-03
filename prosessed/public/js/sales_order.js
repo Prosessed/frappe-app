@@ -107,10 +107,10 @@ frappe.ui.form.on("Sales Order", {
                         <div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-                        <div class="flex items-center justify-center h-75 border-b-grey text-6xl text-grey-100">
+                        <div class="flex items-center justify-center border-b-grey text-6xl text-grey-100" style = "height:10rem;">
                             <img
                                 onerror="cur_pos.item_selector.handle_broken_image(this)"
-                                class="h-full item-img" src="${item_image}"
+                                class="object-fit-contain item-img" src="${item_image}"
                                 alt="${frappe.get_abbr(item.item_name)}"
                             >
                         </div>`;
@@ -125,7 +125,7 @@ frappe.ui.form.on("Sales Order", {
 
             return (
                 `<div class="item-wrapper pt-3"
-                    style="height:14rem;"
+                    style="height:fit-content;"
                     data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
                     data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
                     data-rate="${escape(price_list_rate || 0)}" data-warehouse="${escape(item.warehouse)}"
@@ -133,12 +133,12 @@ frappe.ui.form.on("Sales Order", {
 
                     ${get_item_image_html()}
 
-                    <div class="item-detail flex justify-center align-center" style = "height:fit-content !important; padding:0.5rem;">
-                        <div class="item-name" style = "overflow:normal !important; white-space:normal !important;">
+                    <div class="item-detail flex justify-center align-center text-center" style = "height:fit-content !important; padding:0.5rem;">
+                        <div class="item-name text-center mb-2" style = "overflow:normal !important; white-space:normal !important;">
                             ${item.item_name}
                         </div>
                         <div class="item-price" style = "overflow:normal !important; white-space:normal !important;">
-                            <b>"$ ${item.price_list_rate || 0}"</b>
+                            <b>$ ${item.price_list_rate || 0}</b>
                         </div>
                     </div>
                 </div>`
