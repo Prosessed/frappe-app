@@ -18,7 +18,7 @@ def on_submit_stock_entry(doc, method=None):
     if isinstance(doc, object):
         doc = doc.as_dict()
 
-    if doc.items.length:
+    if len(doc.get('items')):
         for item in doc.get('items'):
             if item.custom_expiry_date and item.serial_and_batch_bundle:
                 batch_list = frappe.db.get_list(
