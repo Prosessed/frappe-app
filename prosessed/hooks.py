@@ -127,6 +127,9 @@ fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Proses
 doc_events = {
 	"Sales Order": {
 		"validate": "prosessed.crud_events.validate_sales_order",
+	},
+	"Stock Entry": {
+		"on_submit": "prosessed.crud_events.on_submit_stock_entry"
 	}
 }
 
