@@ -50,6 +50,14 @@ def get_items_from_item_group(item_group=None):
                             ["uom", "conversion_factor"]
                             )
 
+        item_barcodes = frappe.db.get_all(
+                            "Item Barcode",
+                            {
+                                "parent":item_code
+                            },
+                            ["barcode", "barcode_type"]
+                            )
+
         stock_data = get_data(item_code=item_code, item_group=item_group)
 
         list_of_stocks = []
@@ -72,7 +80,8 @@ def get_items_from_item_group(item_group=None):
             "price_list" : price_list,
             "actual_qty" : stock_qty,
             "list_of_uoms" : list_of_uoms,
-            "list_of_stocks" : list_of_stocks
+            "list_of_stocks" : list_of_stocks,
+            "barcode" : item_barcodes
         })
 
     frappe.response["message"] = items

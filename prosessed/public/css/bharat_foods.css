@@ -1,0 +1,14 @@
+/* Global CSS */
+
+/* Colours */
+:root {
+    --navbar-color: #ffb28548;
+}
+
+/* Top Header */
+.navbar{
+    background: var(--navbar-color) !important;
+}
+.navbar-expand{
+    background-color: var(--navbar-color);
+}
