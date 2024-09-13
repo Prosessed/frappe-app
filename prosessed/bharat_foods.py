@@ -74,7 +74,7 @@ def get_items_from_item_group(item_group=None):
         items.append({
             "item_code" :item_code,
             "item_name" : item_details.get('item_name'),
-            "description" : item_details.get('description')
+            "description" : item_details.get('description'),
             "brand" : item_details.get('brand'),
             "item_image" : item_details.get('image'),
             "stock_uom" : item_details.get('stock_uom'),
