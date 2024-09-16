@@ -39,7 +39,7 @@ def get_items_from_item_group(item_group=None):
         item_details = frappe.db.get_value(
                             "Item",
                             item_code,
-                            ["stock_uom", "brand", "image", "item_name","valuation_rate","description"],
+                            ["stock_uom", "brand", "image", "item_name","valuation_rate","description","sales_uom"],
                             as_dict=1
                             )
         list_of_uoms = frappe.db.get_all(
@@ -78,6 +78,7 @@ def get_items_from_item_group(item_group=None):
             "brand" : item_details.get('brand'),
             "item_image" : item_details.get('image'),
             "stock_uom" : item_details.get('stock_uom'),
+            "sales_uom" : item_details.get('sales_uom'),
             "price_list" : price_list,
             "actual_qty" : stock_qty,
             "list_of_uoms" : list_of_uoms,
