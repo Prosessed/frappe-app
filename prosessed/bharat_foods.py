@@ -3,19 +3,26 @@ from erpnext.stock.dashboard.item_dashboard import get_data
 import frappe.utils
 
 @frappe.whitelist()
-def get_items_from_item_group(item_group=None):
-    if not item_group:
+def get_items_from_item_group(item_group=None, search_term=None, is_search=False):
+    if not item_group and not is_search:
         frappe.response["status_code"] = 400
         frappe.response["message"] = "Item Group Required"
         return
 
-    if not frappe.db.get_value("Item Group", item_group):
+    if item_group and not frappe.db.get_value("Item Group", item_group):
         frappe.response["status_code"] = 500
         frappe.response["message"] = "Item Group Not Found"
         return
 
     items = []
-    item_list = frappe.db.get_all("Item", {"item_group":item_group}, pluck="name")
+    filters = {}
+
+    if item_group and not is_search:
+        filters["item_group"] = item_group
+    elif is_search and search_term:
+        filters = {'item_name':['like',f'%{search_term}%']}
+
+    item_list = frappe.db.get_all("Item", filters, pluck="name")
 
     for item_code in item_list:
         price_list = {}
