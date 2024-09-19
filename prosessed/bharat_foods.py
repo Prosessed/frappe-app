@@ -105,3 +105,11 @@ def get_items_from_item_group(item_group:str=None, search_term:str=None, is_sear
         })
 
     frappe.response["message"] = items
+
+#queries
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_uom_list(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+        select uom from `tabUOM Conversion Detail` where parent='{0}' and uom like '%{1}%'
+	    """.format(filters.get("item_code"), txt))

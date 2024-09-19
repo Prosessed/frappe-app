@@ -5,6 +5,12 @@ frappe.ui.form.on("Sales Order", {
         }
         frm.trigger('set_gross_profit_color')
     },
+	onload: (frm) => {
+	    frm.set_query('uom', 'items', function(doc, cdt, cdn) {
+	        let row = locals[cdt][cdn]
+	        return {query: "prosessed.bharat_foods.get_uom_list", "filters":{"item_code": row.item_code}}
+	    })
+	},
     set_warehouse : (frm) => {
         frm.trigger('load_item_card')
     },
