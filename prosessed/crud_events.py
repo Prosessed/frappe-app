@@ -13,8 +13,8 @@ def validate_sales_order(doc, method=None):
     doc.custom_gross_profit = gross_profit
     doc.custom_gross_profit_ = gross_profit_percent
 
+
 def on_submit_stock_entry(doc, method=None):
-    print("------------------------",doc)
     if isinstance(doc, object):
         doc = doc.as_dict()
 
@@ -43,6 +43,7 @@ def on_submit_stock_entry(doc, method=None):
                             item.custom_expiry_date, update_modified=False
                             )
 
+
 def before_save_batch(doc, method=None):
     if doc.reference_doctype and doc.reference_doctype == "Stock Entry":
         expiry_date, vendor_batch = frappe.db.get_value("Stock Entry Detail",
@@ -57,3 +58,20 @@ def before_save_batch(doc, method=None):
             doc.custom_vendor_batch = vendor_batch
 
 
+def update_sales_order_workflow_state(doc, method=None):
+    sales_order = str()
+    if doc.items:
+        for item in doc.items:
+            if item.sales_order:
+                sales_order = item.sales_order
+                break
+
+    if sales_order and (doc.docstatus == 0 and method == "validate") or doc.docstatus == 1:
+        frappe.db.set_value("Sales Order",
+            {
+                "name":sales_order
+            },
+            "workflow_state",
+            doc.workflow_state,
+            update_modified=False
+        )
