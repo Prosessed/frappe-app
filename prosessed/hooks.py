@@ -130,6 +130,10 @@ doc_events = {
 	},
 	"Batch": {
 		"before_save": "prosessed.crud_events.before_save_batch"
+	},
+	"Sales Invoice" : {
+		"validate": "prosessed.crud_events.update_sales_order_workflow_state",
+		"on_update_after_submit": "prosessed.crud_events.update_sales_order_workflow_state"
 	}
 }
 
