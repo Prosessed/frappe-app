@@ -15,10 +15,10 @@ def get_items_from_item_group(item_group=None):
         return
 
     items = []
-    price_list = {}
     item_list = frappe.db.get_all("Item", {"item_group":item_group}, pluck="name")
 
     for item_code in item_list:
+        price_list = {}
         price_list["buying_rate"] = frappe.db.get_value(
                                         "Item Price",
                                         {
@@ -39,7 +39,7 @@ def get_items_from_item_group(item_group=None):
         item_details = frappe.db.get_value(
                             "Item",
                             item_code,
-                            ["stock_uom", "brand", "image", "item_name","valuation_rate",],
+                            ["stock_uom", "brand", "image", "item_name","valuation_rate"],
                             as_dict=1
                             )
         list_of_uoms = frappe.db.get_all(
