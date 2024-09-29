@@ -5,7 +5,7 @@ frappe.ui.form.on("Sales Order", {
         }
         frm.trigger('set_gross_profit_color')
 
-        if (frm.doc.docstatus === 0) {
+        if (frm.doc.docstatus === 1) {
             frappe.call({
                 method: "prosessed.bharat_foods.check_si_against_so",
                 args: {
