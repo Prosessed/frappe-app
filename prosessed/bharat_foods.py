@@ -113,3 +113,17 @@ def get_uom_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
         select uom from `tabUOM Conversion Detail` where parent='{0}' and uom like '%{1}%'
 	    """.format(filters.get("item_code"), txt))
+
+@frappe.whitelist()
+def check_si_against_so(so_name:str):
+    linked_invoices = frappe.db.sql_list(
+			"""select distinct t1.name
+			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
+			so_name,
+		)
+
+    if linked_invoices:
+        return True
+
+    return False

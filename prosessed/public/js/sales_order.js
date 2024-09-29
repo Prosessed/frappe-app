@@ -4,6 +4,23 @@ frappe.ui.form.on("Sales Order", {
             frm.trigger("load_item_card")
         }
         frm.trigger('set_gross_profit_color')
+
+        if (frm.doc.docstatus === 0) {
+            frappe.call({
+                method: "prosessed.bharat_foods.check_si_against_so",
+                args: {
+                    so_name: frm.doc.name
+                },
+                callback: (res) => {
+                    if (!res.exec && res.message) {
+                        console.log(res);
+                        frm.remove_custom_button('Sales Invoice', _('Create'))
+
+
+                    }
+                }
+            })
+        }
     },
 	onload: (frm) => {
 	    frm.set_query('uom', 'items', function(doc, cdt, cdn) {
