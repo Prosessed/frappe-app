@@ -1,47 +1,45 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:business_name",
- "creation": "2024-04-08 11:09:07.768367",
+ "creation": "2024-09-10 17:21:58.782995",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "business_name",
-  "tax_id",
-  "type_of_business",
-  "url"
+  "email_id",
+  "phone_number",
+  "user_type",
+  "client"
  ],
  "fields": [
   {
-   "fieldname": "business_name",
+   "fieldname": "email_id",
    "fieldtype": "Data",
-   "label": "Business Name",
-   "unique": 1
+   "label": "Email ID"
   },
   {
-   "fieldname": "tax_id",
-   "fieldtype": "Data",
-   "label": "Tax ID"
+   "fieldname": "phone_number",
+   "fieldtype": "Phone",
+   "label": "Phone Number"
   },
   {
-   "fieldname": "type_of_business",
+   "fieldname": "user_type",
    "fieldtype": "Select",
-   "label": "Type of Business",
-   "options": "\nManufacturer\nD2C Brand\nHome Service Provider"
+   "label": "User Type",
+   "options": "\nIndividual\nCompany"
   },
   {
-   "fieldname": "url",
-   "fieldtype": "Data",
-   "label": "URL"
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "label": "Client",
+   "options": "Business"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-10 17:32:02.638675",
+ "modified": "2024-09-10 17:35:34.522030",
  "modified_by": "Administrator",
  "module": "Prosessed",
- "name": "Business",
- "naming_rule": "By fieldname",
+ "name": "All Users Master",
  "owner": "Administrator",
  "permissions": [
   {
