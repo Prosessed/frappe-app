@@ -33,7 +33,7 @@ doctype_js = {"Sales Order" : "public/js/sales_order.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Server Script", "filters": [["module" , "in" , ("Prosessed")]]}]
+fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Server Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Workflow State"}, {"doctype": "Workflow Action Master"}, {"doctype": "Workflow Action"}, {"doctype": "Workflow List"}]
 
 # Svg Icons
 # ------------------
