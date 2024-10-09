@@ -28,12 +28,12 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Sales Order" : "public/js/sales_order.js"}
+# doctype_js = {"Sales Order" : "public/js/sales_order.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Server Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Workflow State"}, {"doctype": "Workflow Action Master"}, {"doctype": "Workflow Action"}, {"doctype": "Workflow"}]
+# fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Server Script", "filters": [["module" , "in" , ("Prosessed")]]},{"doctype": "Workflow State"}, {"doctype": "Workflow Action Master"}, {"doctype": "Workflow Action"}, {"doctype": "Workflow"}]
 
 # Svg Icons
 # ------------------
@@ -124,13 +124,22 @@ fixtures = [{"doctype": "Client Script", "filters": [["module" , "in" , ("Proses
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Sales Invoice": {
+		"validate": "prosessed.crud_events.update_sales_order_workflow_state",
+		"on_update_after_submit": "prosessed.crud_events.update_sales_order_workflow_state"
+	},
+	"Work Order": {
+	    "on_update_after_submit": "prosessed.crud_events.update_sales_order_workflow_state"
+	},
+	"Purchase Receipt": {
+	    "validate": "prosessed.crud_events.update_purchase_order_workflow_state",
+	    "on_update_after_submit": "prosessed.crud_events.update_purchase_order_workflow_state"
+	},
+	"Purchase Order": {
+	    "on_update_after_submit" : "prosessed.crud_events.create_purchase_receipt"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
