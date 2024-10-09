@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"cDI-JQDR88\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">HFC Warehouse</span>\",\"col\":12}},{\"id\":\"ZEMcgtkfs_\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incoming PO\",\"col\":4}},{\"id\":\"epThO44plJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outgoing Orders\",\"col\":4}}]",
+ "content": "[{\"id\":\"cDI-JQDR88\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">HFC Warehouse</span>\",\"col\":12}},{\"id\":\"ZEMcgtkfs_\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incoming PO\",\"col\":4}},{\"id\":\"epThO44plJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outgoing Orders\",\"col\":4}},{\"id\":\"uGKX8Fo3SE\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Picking for Production\",\"col\":4}}]",
  "creation": "2024-08-27 14:49:10.900219",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,11 +13,15 @@
  "is_hidden": 0,
  "label": "HFC Warehouse",
  "links": [],
- "modified": "2024-09-12 14:05:59.004928",
+ "modified": "2024-10-03 16:33:25.958870",
  "modified_by": "Administrator",
  "module": "Prosessed",
  "name": "HFC Warehouse",
  "number_cards": [
+  {
+   "label": "Picking for Production",
+   "number_card_name": "Work Order Picking Stage"
+  },
   {
    "label": "Incoming PO",
    "number_card_name": "Incoming PO"
