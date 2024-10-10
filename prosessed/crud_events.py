@@ -31,7 +31,7 @@ def update_purchase_order_workflow_state(doc, method=None):
                 purchase_order = item.purchase_order
                 break
 
-    if purchase_order and (doc.docstatus == 0 and method == "validate") or  doc.docstatus == 1:
+    if purchase_order and doc.docstatus == 1:
         frappe.db.set_value("Purchase Order",
             {
                 "name":purchase_order
