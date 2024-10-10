@@ -42,9 +42,14 @@ def update_purchase_order_workflow_state(doc, method=None):
         )
 
 def create_purchase_receipt(doc, method=None):
-    frappe.log_error("entered hooks", f"{doc.docstatus} & {doc.workflow_state}")
-    # frappe.errprint("doc", doc.docstatus, doc.workflow_state)
-    if doc.docstatus == 1 and doc.workflow_state == "Incoming Goods":
-	#frappe.errprint("doc", doc.docstatus, doc.workflow_state)
-	pr_doc = make_purchase_receipt(doc.name)
-	pr_doc.save()
+    allow_receipt = False
+    for item in doc.items:
+        if item.delivered_by_supplier != 1:
+            allow_receipt = True
+            break
+
+    if doc.status not in ["Closed", "On Hold"] and (doc.per_received < 100 and allow_receipt):
+        frappe.log_error("entered hooks", f"{doc.docstatus} & {doc.workflow_state}")
+        if doc.docstatus == 1 and doc.workflow_state == "Incoming Goods":
+            pr_doc = make_purchase_receipt(doc.name)
+            pr_doc.save()
