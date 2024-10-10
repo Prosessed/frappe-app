@@ -24,6 +24,7 @@ def update_sales_order_workflow_state(doc, method=None):
         )
 
 def update_purchase_order_workflow_state(doc, method=None):
+    frappe.log_error("update_po_ws", f"{doc.docstatus} & {doc.workflow_state}")
     purchase_order = str()
     if doc.items:
         for item in doc.items:
@@ -32,6 +33,7 @@ def update_purchase_order_workflow_state(doc, method=None):
                 break
 
     if purchase_order and doc.docstatus == 1:
+	frappe.log_error("update_po_ws")
         frappe.db.set_value("Purchase Order",
             {
                 "name":purchase_order
