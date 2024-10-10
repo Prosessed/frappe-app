@@ -137,7 +137,7 @@ doc_events = {
 	    "on_update_after_submit": "prosessed.crud_events.update_purchase_order_workflow_state"
 	},
 	"Purchase Order": {
-	    "on_update_after_submit" : "prosessed.crud_events.create_purchase_receipt"
+	    "on_submit" : "prosessed.crud_events.create_purchase_receipt"
 	}
 }
 

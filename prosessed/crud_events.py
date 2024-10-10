@@ -3,7 +3,9 @@ from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_r
 
 def update_sales_order_workflow_state(doc, method=None):
     sales_order = str()
-    if doc.items:
+    if doc.doctype == "Work Order" and doc.sales_order:
+        sales_order = doc.sales_order
+    elif doc.items:
         for item in doc.items:
             if item.sales_order:
                 sales_order = item.sales_order
@@ -11,7 +13,7 @@ def update_sales_order_workflow_state(doc, method=None):
 
     if sales_order and (doc.docstatus == 0 and method == "validate") or (
         doc.doctype == "Sales Invoice" and doc.docstatus == 1) or (
-        doc.doctype == "Work Order" and doc.docstatus == 1 and doc.workflow_state == "Production Completed"):
+        doc.doctype == "Work Order" and doc.workflow_state == "Production Completed"):
         frappe.db.set_value("Sales Order",
             {
                 "name":sales_order
@@ -40,6 +42,9 @@ def update_purchase_order_workflow_state(doc, method=None):
         )
 
 def create_purchase_receipt(doc, method=None):
+    frappe.log_error("entered hooks", f"{doc.docstatus} & {doc.workflow_state}")
+    # frappe.errprint("doc", doc.docstatus, doc.workflow_state)
     if doc.docstatus == 1 and doc.workflow_state == "Incoming Goods":
-        pr_doc = make_purchase_receipt(doc.name)
-        pr_doc.save()
+	#frappe.errprint("doc", doc.docstatus, doc.workflow_state)
+	pr_doc = make_purchase_receipt(doc.name)
+	pr_doc.save()
