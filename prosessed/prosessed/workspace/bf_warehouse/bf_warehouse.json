@@ -1,0 +1,51 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"dIGE9aOQjI\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">BF Warehouse</span>\",\"col\":12}},{\"id\":\"MS1b188Wnx\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incoming PO\",\"col\":6}},{\"id\":\"_8LmbguHV1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Outgoing SO\",\"col\":6}},{\"id\":\"hMzaeTz58g\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Audit\",\"col\":3}}]",
+ "creation": "2024-08-28 14:52:46.314627",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "liabilities",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "BF Warehouse",
+ "links": [],
+ "modified": "2024-10-09 22:19:21.414424",
+ "modified_by": "navneet@prosessed.com",
+ "module": "Prosessed",
+ "name": "BF Warehouse",
+ "number_cards": [
+  {
+   "label": "Outgoing SO",
+   "number_card_name": "Outgoing SO"
+  },
+  {
+   "label": "Incoming PO",
+   "number_card_name": "Incoming PO"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Warehouse Manager"
+  }
+ ],
+ "sequence_id": 27.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Stock Audit",
+   "link_to": "Stock Audit",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "BF Warehouse"
+}
