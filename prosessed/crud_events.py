@@ -53,3 +53,16 @@ def create_purchase_receipt(doc, method=None):
         if doc.docstatus == 1 and doc.workflow_state == "Incoming Goods":
             pr_doc = make_purchase_receipt(doc.name)
             pr_doc.save()
+
+def before_save_batch(doc, method=None):
+    if doc.reference_doctype and doc.reference_doctype == "Stock Entry":
+        expiry_date, vendor_batch = frappe.db.get_value("Stock Entry Detail",
+                        {"parent":doc.reference_name, "item_code":doc.item},
+                        ["custom_expiry_date", "custom_vendor_batch"]
+                        )
+
+        if expiry_date:
+            doc.expiry_date = expiry_date
+
+        if vendor_batch:
+            doc.custom_vendor_batch = vendor_batch

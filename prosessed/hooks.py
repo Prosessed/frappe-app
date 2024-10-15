@@ -138,6 +138,9 @@ doc_events = {
 	},
 	"Purchase Order": {
 	    "on_submit" : "prosessed.crud_events.create_purchase_receipt"
+	},
+	"Batch": {
+		"before_save" : "prosessed.crud_events.before_save_batch"
 	}
 }
 
