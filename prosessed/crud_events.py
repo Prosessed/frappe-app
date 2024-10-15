@@ -1,5 +1,7 @@
 import frappe
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+from erpnext.stock.doctype.batch.batch import make_batch
+
 
 def update_sales_order_workflow_state(doc, method=None):
     sales_order = str()
@@ -55,8 +57,8 @@ def create_purchase_receipt(doc, method=None):
             pr_doc.save()
 
 def before_save_batch(doc, method=None):
-    if doc.reference_doctype and doc.reference_doctype == "Stock Entry":
-        expiry_date, vendor_batch = frappe.db.get_value("Stock Entry Detail",
+    if doc.reference_doctype and doc.reference_doctype == "Purchase Receipt":
+        expiry_date, vendor_batch = frappe.db.get_value("Purchase Receipt Item",
                         {"parent":doc.reference_name, "item_code":doc.item},
                         ["custom_expiry_date", "custom_vendor_batch"]
                         )
@@ -66,3 +68,27 @@ def before_save_batch(doc, method=None):
 
         if vendor_batch:
             doc.custom_vendor_batch = vendor_batch
+
+
+def create_item_wise_batch(doc, method=None):
+    if doc.doctype == "Purchase Receipt":
+        for item in doc.items:
+            if not frappe.db.get_value('Item', item.item_code, "create_new_batch"):
+                if not item.custom_vendor_batch:
+                    frappe.throw("Vendor Batch Error", f"Enter Vendor Batch on Item {item.item_code} for Batch Creation")
+
+                if not item.custom_expiry_date:
+                    frappe.throw("Expiry Date Error", f"Enter Expiry Date on Item {item.item_code} for Batch Creation")
+
+                batch_no = make_batch(
+                            frappe._dict(
+                                {
+                                    "item": item.item_code,
+                                    "batch_id": item.custom_vendor_batch,
+                                    "expiry_date": item.custom_expiry_date,
+                                    "reference_doctype": doc.doctype,
+                                    "reference_name": doc.name,
+                                }
+                            )
+                        )
+                item.batch_no = batch_no
