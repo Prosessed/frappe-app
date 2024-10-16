@@ -162,7 +162,7 @@ def get_customer_details():
     si_mapping = {customer: [] for customer in customer_names}
 
     for si in si_data:
-        customer_name = si.get('customer')
+        customer_name = si
         if customer_name in si_mapping:
             si_mapping[customer_name].append(si)
 
