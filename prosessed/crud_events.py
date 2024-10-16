@@ -67,12 +67,16 @@ def before_save_batch(doc, method=None):
         if expiry_date:
             doc.expiry_date = expiry_date
 
-        if vendor_batch:
-            doc.custom_vendor_batch = vendor_batch
+        # if vendor_batch:
+        #     doc.custom_vendor_batch = vendor_batch
 
 
 def create_item_wise_batch(doc, method=None):
-    if doc.doctype == "Purchase Receipt":
+    if doc.doctype in ["Purchase Receipt", "Stock Entry"]:
+
+        if doc.doctype == "Stock Entry" and doc.stock_entry_type not in ["Maufacture", "Material Receipt", "Repack"]:
+            return
+
         for item in doc.items:
             if not frappe.db.get_value('Item', item.item_code, "create_new_batch"):
                 if not item.custom_vendor_batch:

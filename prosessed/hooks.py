@@ -141,6 +141,9 @@ doc_events = {
 	},
 	"Batch": {
 		"before_save" : "prosessed.crud_events.before_save_batch"
+	},
+	"Stock Entry": {
+		"before_submit": "prosessed.crud_events.create_item_wise_batch"
 	}
 }
 
