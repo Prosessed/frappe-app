@@ -135,12 +135,12 @@ def check_si_against_so(so_name:str):
 
 
 @frappe.whitelist()
-def get_customer_details():
+def get_customer_details(limit_start:int=0, limit_page_length:int=20):
     """Get customer list with customer account details"""
     customers = []
 
     # Fetch all customers at once
-    customer_list = frappe.db.get_all("Customer", {"disabled": 0}, ["*"])
+    customer_list = frappe.db.get_list("Customer", {"disabled": 0}, ["*"], limit_start=limit_start, limit_page_length=limit_page_length)
 
     # Fetch all relevant sales orders and invoices for customers in one go
     customer_names = [customer.get('name') for customer in customer_list]
@@ -178,30 +178,30 @@ def get_customer_details():
             "customer": customer_name
         })
 
-        # cls_data = cls_execute(filters)[1] or [{}]
+        cls_data = cls_execute(filters)[1] or [{}]
 
         # Fetch sales order data
         last_order_data = so_mapping.get(customer_name)
         last_order_date = last_order_data['transaction_date'] if last_order_data else None
         total_so_count = last_order_data['total_so_count'] if last_order_data else 0
 
-        # address_list = frappe.get_list(
-        #     "Address",
-        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-        #              ["Dynamic Link", "link_name", "=", customer_name],
-        #              ["Dynamic Link", "parenttype", "=", "Address"]],
-        #     fields=["*"],
-        #     order_by="is_primary_address DESC, creation ASC",
-        # )
+        address_list = frappe.get_list(
+            "Address",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Address"]],
+            fields=["*"],
+            order_by="is_primary_address DESC, creation ASC",
+        )
 
-        # contact_list = frappe.get_list(
-        #     "Contact",
-        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-        #              ["Dynamic Link", "link_name", "=", customer_name],
-        #              ["Dynamic Link", "parenttype", "=", "Contact"]],
-        #     fields=["*"],
-        #     order_by="is_primary_contact DESC, creation ASC",
-        # )
+        contact_list = frappe.get_list(
+            "Contact",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Contact"]],
+            fields=["*"],
+            order_by="is_primary_contact DESC, creation ASC",
+        )
 
         customers.append({
             "customer_name": customer_name,
@@ -209,14 +209,14 @@ def get_customer_details():
             "phone_no": customer.get('mobile_no', ''),
             "email": customer.get('email_id', ''),
             "customer_type": customer.get('customer_type', ''),
-            # "address_list": address_list,
-            # "contact_list": contact_list,
+            "address_list": address_list,
+            "contact_list": contact_list,
             "payment_terms": customer.get('payment_terms', ''),
             "total_payment_due": dashboard_info[0].get('total_unpaid', 0),
-            # "total_paid_amount": cls_data[0].get('paid_amount', 0),
-            # "invoiced_amount": cls_data[0].get('invoiced_amount', 0),
-            # "closing_balance": cls_data[0].get('closing_balance', 0),
-            # "opening_balance": cls_data[0].get('opening_balance', 0),
+            "total_paid_amount": cls_data[0].get('paid_amount', 0),
+            "invoiced_amount": cls_data[0].get('invoiced_amount', 0),
+            "closing_balance": cls_data[0].get('closing_balance', 0),
+            "opening_balance": cls_data[0].get('opening_balance', 0),
             "last_order_date": last_order_date,
             "total_so_count": total_so_count,
             "list_of_si": si_mapping.get(customer_name, []),
