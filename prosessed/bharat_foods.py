@@ -178,7 +178,7 @@ def get_customer_details():
             "customer": customer_name
         })
 
-        cls_data = cls_execute(filters)[1] or [{}]
+        # cls_data = cls_execute(filters)[1] or [{}]
 
         # Fetch sales order data
         last_order_data = so_mapping.get(customer_name)
@@ -213,10 +213,10 @@ def get_customer_details():
             # "contact_list": contact_list,
             "payment_terms": customer.get('payment_terms', ''),
             "total_payment_due": dashboard_info[0].get('total_unpaid', 0),
-            "total_paid_amount": cls_data[0].get('paid_amount', 0),
-            "invoiced_amount": cls_data[0].get('invoiced_amount', 0),
-            "closing_balance": cls_data[0].get('closing_balance', 0),
-            "opening_balance": cls_data[0].get('opening_balance', 0),
+            # "total_paid_amount": cls_data[0].get('paid_amount', 0),
+            # "invoiced_amount": cls_data[0].get('invoiced_amount', 0),
+            # "closing_balance": cls_data[0].get('closing_balance', 0),
+            # "opening_balance": cls_data[0].get('opening_balance', 0),
             "last_order_date": last_order_date,
             "total_so_count": total_so_count,
             "list_of_si": si_mapping.get(customer_name, []),
