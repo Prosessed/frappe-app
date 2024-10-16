@@ -13,8 +13,9 @@ frappe.ui.form.on("Sales Order", {
                 },
                 callback: (res) => {
                     if (!res.exec && res.message) {
-                        console.log(res);
-                        frm.remove_custom_button('Sales Invoice', 'Create')
+			setTimeout(() => {
+                            frm.remove_custom_button('Sales Invoice', 'Create')
+			}, 500);
 
 
                     }

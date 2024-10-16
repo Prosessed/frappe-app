@@ -1,0 +1,87 @@
+{
+ "charts": [
+  {
+   "chart_name": "Category Wise Item Count",
+   "label": "Category Wise Product"
+  }
+ ],
+ "content": "[{\"id\":\"H8Nq4hcE4d\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Category</span>\",\"col\":12}},{\"id\":\"WxaH60Vv8q\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Bharat Foods\",\"col\":3}},{\"id\":\"MTLMsQl7No\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Incence\",\"col\":3}},{\"id\":\"fQpjrxE-w-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Flour\",\"col\":3}},{\"id\":\"hFBAq5nUyg\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Utensils\",\"col\":3}},{\"id\":\"n_tX29c_Ij\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Indian Tin Sweets\",\"col\":3}},{\"id\":\"AlyCmyLrWM\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Beverages\",\"col\":3}},{\"id\":\"clKhrBK67I\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Toiletries\",\"col\":3}},{\"id\":\"CjhrRLnrx4\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Condiments\",\"col\":3}},{\"id\":\"1HAAykjUQa\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Cosmetics\",\"col\":3}},{\"id\":\"QKKKub3B29\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Confectionery\",\"col\":3}},{\"id\":\"_tvoSPeOtE\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Supplements\",\"col\":3}},{\"id\":\"C44D7AEA_c\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Rice\",\"col\":3}},{\"id\":\"C7RqHmCtsy\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Spice Mix\",\"col\":3}},{\"id\":\"fAs_c7fZsW\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Category Wise Product\",\"col\":12}}]",
+ "creation": "2024-08-14 13:54:52.272543",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "group-by",
+ "idx": 0,
+ "indicator_color": "",
+ "is_hidden": 0,
+ "label": "Category",
+ "links": [],
+ "modified": "2024-10-09 22:19:58.234513",
+ "modified_by": "navneet@prosessed.com",
+ "module": "Prosessed",
+ "name": "Category",
+ "number_cards": [
+  {
+   "label": "Spice Mix",
+   "number_card_name": "Spice Mix"
+  },
+  {
+   "label": "Bharat Foods",
+   "number_card_name": "Bharat Foods"
+  },
+  {
+   "label": "Rice",
+   "number_card_name": "Rice"
+  },
+  {
+   "label": "Incence",
+   "number_card_name": "Incence"
+  },
+  {
+   "label": "Flour",
+   "number_card_name": "Flour"
+  },
+  {
+   "label": "Utensils",
+   "number_card_name": "Utensils"
+  },
+  {
+   "label": "Indian Tin Sweets",
+   "number_card_name": "Indian Tin Sweets"
+  },
+  {
+   "label": "Beverages",
+   "number_card_name": "Beverages"
+  },
+  {
+   "label": "Toiletries",
+   "number_card_name": "Toiletries"
+  },
+  {
+   "label": "Condiments",
+   "number_card_name": "Condiments"
+  },
+  {
+   "label": "Cosmetics",
+   "number_card_name": "Cosmetics"
+  },
+  {
+   "label": "Confectionery",
+   "number_card_name": "Confectionery"
+  },
+  {
+   "label": "Supplements",
+   "number_card_name": "Supplements"
+  }
+ ],
+ "owner": "madhavan.t@prosessed.com",
+ "parent_page": "Stock",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 9.0,
+ "shortcuts": [],
+ "title": "Category"
+}
