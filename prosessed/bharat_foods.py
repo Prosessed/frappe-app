@@ -1,6 +1,9 @@
 import frappe
 from erpnext.stock.dashboard.item_dashboard import get_data
-import frappe.utils
+from erpnext.accounts.party import get_dashboard_info
+from erpnext.accounts.report.customer_ledger_summary.customer_ledger_summary import execute as cls_execute
+from frappe.utils import getdate
+
 
 @frappe.whitelist()
 def get_items_from_item_group(item_group:str=None, search_term:str=None, is_search:bool=False):
@@ -106,6 +109,7 @@ def get_items_from_item_group(item_group:str=None, search_term:str=None, is_sear
 
     frappe.response["message"] = items
 
+
 #queries
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -113,6 +117,7 @@ def get_uom_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
         select uom from `tabUOM Conversion Detail` where parent='{0}' and uom like '%{1}%'
 	    """.format(filters.get("item_code"), txt))
+
 
 @frappe.whitelist()
 def check_si_against_so(so_name:str):
@@ -127,3 +132,122 @@ def check_si_against_so(so_name:str):
         return True
 
     return False
+
+
+@frappe.whitelist()
+def get_customer_details():
+    """Get customer list with customer account details"""
+    customers = []
+    customer_list = frappe.db.get_all("Customer", {"disabled": 0}, ["*"])
+
+    for customer in customer_list:
+        customer_name = customer.get('name')
+
+        dashboard_info = get_dashboard_info("Customer", customer_name, customer.get('loyalty_program'))
+        if not dashboard_info:
+            dashboard_info = [{}]
+
+        filters = frappe._dict({
+            "from_date": customer.get('creation'),
+            "to_date": getdate(),
+            "customer": customer_name
+        })
+
+        cls_data = cls_execute(filters)[1] or [{}]
+
+        so_data = frappe.db.get_all('Sales Order',
+            {'customer': customer_name, 'docstatus': 1},
+            ['transaction_date', 'COUNT(name) as total_so_count'],
+            order_by='transaction_date DESC',
+            limit=1
+        )
+        last_order_date = so_data[0]['transaction_date'] if so_data else None
+        total_so_count = so_data[0]['total_so_count'] if so_data else 0
+
+        si_list = frappe.db.get_all('Sales Invoice', {'customer': customer_name}, pluck='name')
+
+        address_list = frappe.get_list(
+            "Address",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Address"]],
+            fields=["*"],
+            order_by="is_primary_address DESC, creation ASC",
+        )
+
+        contact_list = frappe.get_list(
+            "Contact",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Contact"]],
+            fields=["*"],
+            order_by="is_primary_contact DESC, creation ASC",
+        )
+
+        customers.append({
+            "customer_name": customer_name,
+            "customer_group": customer.get('customer_group', ''),
+            "phone_no": customer.get('mobile_no', ''),
+            "email": customer.get('email_id', ''),
+            "customer_type": customer.get('customer_type', ''),
+            "address_list": address_list,
+            "contact_list": contact_list,
+            "payment_terms": customer.get('payment_terms', ''),
+            "total_payment_due": dashboard_info[0].get('total_unpaid', 0),
+            "total_paid_amount": cls_data[0].get('paid_amount', 0),
+            "invoiced_amount": cls_data[0].get('invoiced_amount', 0),
+            "closing_balance": cls_data[0].get('closing_balance', 0),
+            "opening_balance": cls_data[0].get('opening_balance', 0),
+            "last_order_date": last_order_date,
+            "total_so_count": total_so_count,
+            "list_of_si": si_list,
+            "top_3_products": get_top_3_consecutive_products(customer_name)
+        })
+
+    return customers
+
+
+
+def get_top_3_consecutive_products(customer):
+    sales_orders = frappe.db.sql("""
+        SELECT soi.item_code, so.transaction_date
+        FROM `tabSales Order Item` soi
+        JOIN `tabSales Order` so ON so.name = soi.parent
+        WHERE so.customer = %s AND so.docstatus = 1
+        ORDER BY so.transaction_date ASC
+    """, (customer,), as_dict=True)
+
+    if not sales_orders:
+        return None
+
+    # Initialize variables to track consecutive products
+    consecutive_products = {}
+    last_product = None
+    consecutive_count = 0
+
+    # Process each sales order
+    for order in sales_orders:
+        current_product = order["item_code"]
+
+        # Check if the product is the same as the last ordered product
+        if current_product == last_product:
+            consecutive_count += 1
+        else:
+            # Reset count for new product
+            consecutive_count = 1
+
+        # Update the consecutive count in the dictionary
+        if current_product in consecutive_products:
+            consecutive_products[current_product] = max(consecutive_products[current_product], consecutive_count)
+        else:
+            consecutive_products[current_product] = consecutive_count
+
+        # Set last_product for next iteration
+        last_product = current_product
+
+    # Sort products by consecutive count and get top 3
+    sorted_products = sorted(consecutive_products.items(), key=lambda x: x[1], reverse=True)
+    top_3_products = sorted_products[:3]
+
+    # Return the top 3 products
+    return [product[0] for product in top_3_products]
