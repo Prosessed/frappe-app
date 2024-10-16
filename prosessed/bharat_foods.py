@@ -135,12 +135,16 @@ def check_si_against_so(so_name:str):
 
 
 @frappe.whitelist()
-def get_customer_details(limit_start:int=0, limit_page_length:int=20):
+def get_sales_person_customers(sales_person:str,limit_start:int=0, limit_page_length:int=20):
     """Get customer list with customer account details"""
+
+    sales_person_name = frappe.utils.get_fullname(sales_person)
     customers = []
 
     # Fetch all customers at once
-    customer_list = frappe.db.get_list("Customer", {"disabled": 0}, ["*"], limit_start=limit_start, limit_page_length=limit_page_length)
+    customer_list = frappe.db.get_list("Customer", filters=[["Sales Team", "sales_person", "=", sales_person_name],
+                     ["Sales Team", "parenttype", "=", "Customer"], ["disabled", "=", 0]], fields=["*"],
+                     limit_start=limit_start, limit_page_length=limit_page_length)
 
     # Fetch all relevant sales orders and invoices for customers in one go
     customer_names = [customer.get('name') for customer in customer_list]
