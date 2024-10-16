@@ -185,23 +185,23 @@ def get_customer_details():
         last_order_date = last_order_data['transaction_date'] if last_order_data else None
         total_so_count = last_order_data['total_so_count'] if last_order_data else 0
 
-        address_list = frappe.get_list(
-            "Address",
-            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_name],
-                     ["Dynamic Link", "parenttype", "=", "Address"]],
-            fields=["*"],
-            order_by="is_primary_address DESC, creation ASC",
-        )
+        # address_list = frappe.get_list(
+        #     "Address",
+        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+        #              ["Dynamic Link", "link_name", "=", customer_name],
+        #              ["Dynamic Link", "parenttype", "=", "Address"]],
+        #     fields=["*"],
+        #     order_by="is_primary_address DESC, creation ASC",
+        # )
 
-        contact_list = frappe.get_list(
-            "Contact",
-            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_name],
-                     ["Dynamic Link", "parenttype", "=", "Contact"]],
-            fields=["*"],
-            order_by="is_primary_contact DESC, creation ASC",
-        )
+        # contact_list = frappe.get_list(
+        #     "Contact",
+        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+        #              ["Dynamic Link", "link_name", "=", customer_name],
+        #              ["Dynamic Link", "parenttype", "=", "Contact"]],
+        #     fields=["*"],
+        #     order_by="is_primary_contact DESC, creation ASC",
+        # )
 
         customers.append({
             "customer_name": customer_name,
@@ -209,8 +209,8 @@ def get_customer_details():
             "phone_no": customer.get('mobile_no', ''),
             "email": customer.get('email_id', ''),
             "customer_type": customer.get('customer_type', ''),
-            "address_list": address_list,
-            "contact_list": contact_list,
+            # "address_list": address_list,
+            # "contact_list": contact_list,
             "payment_terms": customer.get('payment_terms', ''),
             "total_payment_due": dashboard_info[0].get('total_unpaid', 0),
             "total_paid_amount": cls_data[0].get('paid_amount', 0),
