@@ -138,14 +138,39 @@ def check_si_against_so(so_name:str):
 def get_customer_details():
     """Get customer list with customer account details"""
     customers = []
+
+    # Fetch all customers at once
     customer_list = frappe.db.get_all("Customer", {"disabled": 0}, ["*"])
+
+    # Fetch all relevant sales orders and invoices for customers in one go
+    customer_names = [customer.get('name') for customer in customer_list]
+    so_data = frappe.db.get_all('Sales Order',
+        {'customer': ('in', customer_names), 'docstatus': 1},
+        ['customer', 'transaction_date', 'COUNT(name) as total_so_count'],
+        group_by='customer',
+        order_by='transaction_date DESC'
+    )
+
+    si_data = frappe.db.get_all('Sales Invoice',
+        {'customer': ('in', customer_names)},
+        pluck='name',
+        group_by='customer'
+    )
+
+    # Create a mapping for easy lookup
+    so_mapping = {data['customer']: data for data in so_data}
+    si_mapping = {customer: [] for customer in customer_names}
+
+    for si in si_data:
+        customer_name = si.get('customer')
+        if customer_name in si_mapping:
+            si_mapping[customer_name].append(si)
 
     for customer in customer_list:
         customer_name = customer.get('name')
 
-        dashboard_info = get_dashboard_info("Customer", customer_name, customer.get('loyalty_program'))
-        if not dashboard_info:
-            dashboard_info = [{}]
+        # Fetch dashboard info
+        dashboard_info = get_dashboard_info("Customer", customer_name, customer.get('loyalty_program')) or [{}]
 
         filters = frappe._dict({
             "from_date": customer.get('creation'),
@@ -155,16 +180,10 @@ def get_customer_details():
 
         cls_data = cls_execute(filters)[1] or [{}]
 
-        so_data = frappe.db.get_all('Sales Order',
-            {'customer': customer_name, 'docstatus': 1},
-            ['transaction_date', 'COUNT(name) as total_so_count'],
-            order_by='transaction_date DESC',
-            limit=1
-        )
-        last_order_date = so_data[0]['transaction_date'] if so_data else None
-        total_so_count = so_data[0]['total_so_count'] if so_data else 0
-
-        si_list = frappe.db.get_all('Sales Invoice', {'customer': customer_name}, pluck='name')
+        # Fetch sales order data
+        last_order_data = so_mapping.get(customer_name)
+        last_order_date = last_order_data['transaction_date'] if last_order_data else None
+        total_so_count = last_order_data['total_so_count'] if last_order_data else 0
 
         address_list = frappe.get_list(
             "Address",
@@ -200,12 +219,11 @@ def get_customer_details():
             "opening_balance": cls_data[0].get('opening_balance', 0),
             "last_order_date": last_order_date,
             "total_so_count": total_so_count,
-            "list_of_si": si_list,
+            "list_of_si": si_mapping.get(customer_name, []),
             "top_3_products": get_top_3_consecutive_products(customer_name)
         })
 
     return customers
-
 
 
 def get_top_3_consecutive_products(customer):
