@@ -298,7 +298,7 @@ def get_sales_person_orders(sales_person:str, limit_start:int=0, limit_page_leng
     # Fetch all sales order
     so_list = frappe.db.get_list("Sales Order", filters=[["Sales Team", "sales_person", "=", sales_person_name],
                      ["Sales Team", "parenttype", "=", "Sales Order"], ["docstatus", "=", 1]],
-                     fields=["name", "owner", "transaction_date", "delivery_date", "order_type", "customer_name", "grand_total", "in_words"],
+                     fields=["name", "owner", "transaction_date", "delivery_date", "order_type", "customer_name", "grand_total", "in_words", "workflow_state"],
                      limit_start=limit_start, limit_page_length=limit_page_length)
 
     if so_list:
