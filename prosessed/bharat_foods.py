@@ -28,12 +28,12 @@ def get_items_from_item_group(item_group:str=None, search_term:str=None, is_sear
         return
 
     items = []
-    filters = {}
+    filters = {"disabled":0}
 
     if item_group and not is_search:
         filters["item_group"] = item_group
     elif is_search and search_term:
-        filters = {'item_name':['like',f'%{search_term}%']}
+        filters['item_name'] = ['like',f'%{search_term}%']
 
     item_list = frappe.db.get_all("Item", filters, pluck="name")
 
@@ -85,6 +85,7 @@ def get_items_from_item_group(item_group:str=None, search_term:str=None, is_sear
 
         if stock_data:
             stock_qty = stock_data[0].get('actual_qty')
+            projected_qty = stock_data[0].get('projected_qty')
             for stock in stock_data:
                 list_of_stocks.append({
                     "actual_qty" : stock.get('actual_qty'),
@@ -102,6 +103,7 @@ def get_items_from_item_group(item_group:str=None, search_term:str=None, is_sear
             "sales_uom": item_details.get('sales_uom'),
             "price_list": price_list,
             "actual_qty": stock_qty,
+            "projected_qty": projected_qty,
             "list_of_uoms": list_of_uoms,
             "list_of_stocks": list_of_stocks,
             "barcode": item_barcodes
@@ -136,7 +138,16 @@ def check_si_against_so(so_name:str):
 
 @frappe.whitelist()
 def get_sales_person_customers(sales_person:str, limit_start:int=0, limit_page_length:int=100):
-    """Get customer list with customer account details"""
+    """Get customer list assigned for specific sales person
+
+    Args:
+        sales_person (str): sales person email
+        limit_start (int, optional): limit start length for pagination. Defaults to 0.
+        limit_page_length (int, optional): limit page length for pagination. Defaults to 100.
+
+    Returns:
+        list: returns the list of customer details.
+    """
 
     sales_person_name = frappe.utils.get_fullname(sales_person)
     customers = []
@@ -295,6 +306,16 @@ def get_top_3_consecutive_products(customer):
 
 @frappe.whitelist()
 def get_sales_person_orders(sales_person:str, limit_start:int=0, limit_page_length:int=100):
+    """Get the sales orders created by specific sales person.
+
+    Args:
+        sales_person (str): Sales Person Email ID
+        limit_start (int, optional): limit start length for pagination. Defaults to 0.
+        limit_page_length (int, optional): limit page length for pagination. Defaults to 100.
+
+    Returns:
+        list: returns the list of sales orders with invoice print format pdf
+    """
     sales_person_name = frappe.utils.get_fullname(sales_person)
 
     # Fetch all sales order
