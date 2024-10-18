@@ -135,7 +135,7 @@ def check_si_against_so(so_name:str):
 
 
 @frappe.whitelist()
-def get_sales_person_customers(sales_person:str,limit_start:int=0, limit_page_length:int=20):
+def get_sales_person_customers(sales_person:str, limit_start:int=0, limit_page_length:int=100):
     """Get customer list with customer account details"""
 
     sales_person_name = frappe.utils.get_fullname(sales_person)
@@ -194,24 +194,35 @@ def get_sales_person_customers(sales_person:str,limit_start:int=0, limit_page_le
             filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
                      ["Dynamic Link", "link_name", "=", customer_name],
                      ["Dynamic Link", "parenttype", "=", "Address"]],
-            fields=["*"],
+            fields=["address_title","address_type","address_line1","address_line2",
+                    "city","state","country","pincode","email_id","phone","fax",
+                    "is_primary_address","is_shipping_address","disabled","custom_note"],
             order_by="is_primary_address DESC, creation ASC",
         )
+
+        email_id = ''
+        if not customer.get('email') and address_list:
+            email_id = address_list[0]["email_id"]
+
 
         contact_list = frappe.get_list(
             "Contact",
             filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
                      ["Dynamic Link", "link_name", "=", customer_name],
                      ["Dynamic Link", "parenttype", "=", "Contact"]],
-            fields=["*"],
+            fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact"],
             order_by="is_primary_contact DESC, creation ASC",
         )
+
+        phone = ''
+        if not customer.get('mobile_no') and contact_list:
+            phone = contact_list[0]['phone']
 
         customers.append({
             "customer_name": customer_name,
             "customer_group": customer.get('customer_group', ''),
-            "phone_no": customer.get('mobile_no', ''),
-            "email": customer.get('email_id', ''),
+            "phone_no": phone,
+            "email": email_id,
             "customer_type": customer.get('customer_type', ''),
             "address_list": address_list,
             "contact_list": contact_list,
@@ -232,7 +243,7 @@ def get_sales_person_customers(sales_person:str,limit_start:int=0, limit_page_le
 
 def get_top_3_consecutive_products(customer):
     sales_orders = frappe.db.sql("""
-        SELECT soi.item_code, so.transaction_date
+        SELECT soi.item_code, soi.item_name, soi.image, so.transaction_date
         FROM `tabSales Order Item` soi
         JOIN `tabSales Order` so ON so.name = soi.parent
         WHERE so.customer = %s AND so.docstatus = 1
@@ -250,6 +261,8 @@ def get_top_3_consecutive_products(customer):
     # Process each sales order
     for order in sales_orders:
         current_product = order["item_code"]
+        item_image = order["image"]
+        item_name = order["item_name"]
 
         # Check if the product is the same as the last ordered product
         if current_product == last_product:
@@ -260,16 +273,42 @@ def get_top_3_consecutive_products(customer):
 
         # Update the consecutive count in the dictionary
         if current_product in consecutive_products:
-            consecutive_products[current_product] = max(consecutive_products[current_product], consecutive_count)
+            consecutive_products[current_product]["count"] = max(consecutive_products[current_product]["count"], consecutive_count)
         else:
-            consecutive_products[current_product] = consecutive_count
+            consecutive_products[current_product]["count"] = consecutive_count
+            consecutive_products[current_product]["item_image"] = item_image
+            consecutive_products[current_product]["item_name"]= item_name
+            consecutive_products[current_product]["item_code"]= current_product
 
         # Set last_product for next iteration
         last_product = current_product
 
     # Sort products by consecutive count and get top 3
-    sorted_products = sorted(consecutive_products.items(), key=lambda x: x[1], reverse=True)
+    sorted_products = sorted(consecutive_products.items(), key=lambda x: x[1]["count"], reverse=True)
     top_3_products = sorted_products[:3]
 
     # Return the top 3 products
-    return [product[0] for product in top_3_products]
+    return [{"item_code": product[0], "item_name": product[1]["item_name"], "item_image": product[1]["item_image"]} for product in top_3_products]
+
+
+@frappe.whitelist()
+def get_sales_person_orders(sales_person:str, limit_start:int=0, limit_page_length:int=100):
+    sales_person_name = frappe.utils.get_fullname(sales_person)
+
+    # Fetch all sales order
+    so_list = frappe.db.get_list("Sales Order", filters=[["Sales Team", "sales_person", "=", sales_person_name],
+                     ["Sales Team", "parenttype", "=", "Sales Order"], ["docstatus", "=", 1]],
+                     fields=["name", "owner", "transaction_date", "delivery_date", "order_type", "customer_name", "grand_total", "in_words"],
+                     limit_start=limit_start, limit_page_length=limit_page_length)
+
+    if so_list:
+        for so in so_list:
+            if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
+                si_name = frappe.db.get_value("Sales Invoice Item", {"sales_order":so.get('name'), "docstatus":1}, 'parent')
+                if si_name:
+                    pdf_file = frappe.get_print(doctype="Sales Invoice",name=si_name, print_format="Tax Invoice New", as_pdf=True)
+                    so["file"]["filename"] = f'{si_name}.pdf'
+                    so["file"]["filecontent"] = pdf_file
+                    so["file"]["type"] =  'pdf'
+
+    return so_list
