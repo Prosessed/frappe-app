@@ -305,7 +305,9 @@ def get_sales_person_orders(sales_person:str, limit_start:int=0, limit_page_leng
         for so in so_list:
             if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
                 si_name = frappe.db.get_value("Sales Invoice Item", {"sales_order":so.get('name'), "docstatus":1}, 'parent')
+                frappe.log_error("si_name----------------------------", si_name)
                 if si_name:
+                    frappe.log_error("si_name---------------------------- entered", si_name)
                     so["file"] = {}
                     pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
                     so["file"]["filename"] = f'{si_name}.pdf'
