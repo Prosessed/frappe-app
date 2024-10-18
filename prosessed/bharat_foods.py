@@ -275,10 +275,12 @@ def get_top_3_consecutive_products(customer):
         if current_product in consecutive_products:
             consecutive_products[current_product]["count"] = max(consecutive_products[current_product]["count"], consecutive_count)
         else:
-            consecutive_products[current_product]["count"] = consecutive_count
-            consecutive_products[current_product]["item_image"] = item_image
-            consecutive_products[current_product]["item_name"]= item_name
-            consecutive_products[current_product]["item_code"]= current_product
+            consecutive_products[current_product] = {
+                "count": consecutive_count,
+                "item_image": item_image,
+                "item_name": item_name,
+                "item_code": current_product
+            }
 
         # Set last_product for next iteration
         last_product = current_product
