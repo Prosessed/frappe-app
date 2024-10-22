@@ -339,11 +339,11 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
             if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
                 if si_list := frappe.db.get_list("Sales Invoice Item",
                     {"sales_order":so.get('name'), "docstatus":1}, pluck='parent'):
-                    so_list["sales_invoice_list"] = []
+                    so["sales_invoice_list"] = []
 
                     for si in si_list:
                         invoice_id, si_workflow_state, grand_total, invoice_date = frappe.db.get_value("Sales Invoice", si, ["name", "workflow_state", "grand_total", "posting_date"])
-                        so_list["sales_invoice_list"].append({
+                        so["sales_invoice_list"].append({
                             "invoice_id" : invoice_id,
                             "invoice_date" : invoice_date,
                             "workflow_state" : si_workflow_state,
