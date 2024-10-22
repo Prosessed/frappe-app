@@ -336,15 +336,17 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
 
     if so_list:
         for so in so_list:
-            if sales_team_list := frappe.db.get_list("Sales Team", {"parent":so.get('name')}, 'sales_person'):
-                so["sales_persons_involved"] = sales_team_list
+            so['sales_person_involved'] = []
+
+            if sales_team_list := frappe.db.get_list("Sales Team", {"parent":so.get('name'), "docstatus":1}, pluck='sales_person'):
+                so["sales_persons_involved"].append(sales_team_list)
 
             if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
                 if si_list := frappe.db.get_list("Sales Invoice Item",
                     {"sales_order":so.get('name'), "docstatus":1}, pluck='parent'):
                     so["sales_invoice_list"] = []
 
-                    for si in si_list:
+                    for si in set(si_list):
                         invoice_id, si_workflow_state, grand_total, invoice_date = frappe.db.get_value("Sales Invoice", si, ["name", "workflow_state", "grand_total", "posting_date"])
                         so["sales_invoice_list"].append({
                             "invoice_id" : invoice_id,
