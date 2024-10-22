@@ -431,13 +431,13 @@ def get_order_details(order_id:str, limit:int=10, offset:int=0):
                 'items': []
             }
 
-        # Add the items to the relevant invoice
-        invoice_map[invoice_id]['items'].append({
-            'item_name': row['item_name'],
-            'item_quantity': row['item_quantity'],
-            'uom': row['uom'],
-            'rate': row['rate']
-        })
+            # Add the items to the relevant invoice
+            invoice_map[invoice_id]['items'].append({
+                'item_name': row['item_name'],
+                'item_quantity': row['item_quantity'],
+                'uom': row['uom'],
+                'rate': row['rate']
+            })
 
     # Prepare the final result: order details with sales invoices as a list
     result = {
