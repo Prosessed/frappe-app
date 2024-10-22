@@ -336,7 +336,7 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
 
     if so_list:
         for so in so_list:
-            so['sales_person_involved'] = []
+            so["sales_persons_involved"] = []
 
             if sales_team_list := frappe.db.get_list("Sales Team", {"parent":so.get('name'), "docstatus":1}, pluck='sales_person'):
                 so["sales_persons_involved"].append(sales_team_list)
