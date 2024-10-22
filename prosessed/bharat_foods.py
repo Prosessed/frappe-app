@@ -305,34 +305,56 @@ def get_top_3_consecutive_products(customer):
 
 
 @frappe.whitelist()
-def get_sales_person_orders(sales_person:str, limit_start:int=0, limit_page_length:int=100):
+def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workflow_state:str=None, docstatus:int=1, limit_start:int=0, limit_page_length:int=20):
     """Get the sales orders created by specific sales person.
 
     Args:
         sales_person (str): Sales Person Email ID
         limit_start (int, optional): limit start length for pagination. Defaults to 0.
-        limit_page_length (int, optional): limit page length for pagination. Defaults to 100.
+        limit_page_length (int, optional): limit page length for pagination. Defaults to 20.
 
     Returns:
         list: returns the list of sales orders with invoice print format pdf
     """
-    sales_person_name = frappe.utils.get_fullname(sales_person)
+    filters = [["docstatus", "=", docstatus]]
+
+    if sales_person:
+        sales_person_name = frappe.utils.get_fullname(sales_person)
+        filters.append(["Sales Team", "sales_person", "=", sales_person_name])
+        filters.append(["Sales Team", "parenttype", "=", "Sales Order"])
+
+    if customer_name:
+        filters.append(["customer", "=", customer_name])
+
+    if workflow_state:
+        filters.append(["workflow_state", "=", workflow_state])
 
     # Fetch all sales order
-    so_list = frappe.db.get_list("Sales Order", filters=[["Sales Team", "sales_person", "=", sales_person_name],
-                     ["Sales Team", "parenttype", "=", "Sales Order"], ["docstatus", "=", 1]],
-                     fields=["name", "owner", "transaction_date", "delivery_date", "order_type", "customer_name", "grand_total", "in_words", "workflow_state"],
+    so_list = frappe.db.get_list("Sales Order", filters=filters,
+                     fields=["name", "transaction_date", "delivery_date", "order_type", "customer_name", "grand_total", "in_words", "workflow_state"],
                      limit_start=limit_start, limit_page_length=limit_page_length)
 
     if so_list:
         for so in so_list:
             if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
-                si_name = frappe.db.get_value("Sales Invoice Item", {"sales_order":so.get('name'), "docstatus":1}, 'parent')
-                if si_name:
-                    so["file"] = {}
-                    pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
-                    so["file"]["filename"] = f'{si_name}.pdf'
-                    so["file"]["filecontent"] = pdf_file
-                    so["file"]["type"] =  'pdf'
+                if si_list := frappe.db.get_list("Sales Invoice Item",
+                    {"sales_order":so.get('name'), "docstatus":1}, pluck='parent'):
+                    so_list["sales_invoice_list"] = []
+
+                    for si in si_list:
+                        invoice_id, si_workflow_state, grand_total, invoice_date = frappe.db.get_value("Sales Invoice", si, ["name", "workflow_state", "grand_total", "posting_date"])
+                        so_list["sales_invoice_list"].append({
+                            "invoice_id" : invoice_id,
+                            "invoice_date" : invoice_date,
+                            "workflow_state" : si_workflow_state,
+                            "invoice_total" : grand_total
+                        })
 
     return so_list
+
+
+#     so["file"] = {}
+#     pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
+#     so["file"]["filename"] = f'{si_name}.pdf'
+#     so["file"]["filecontent"] = pdf_file
+#     so["file"]["type"] =  'pdf'
