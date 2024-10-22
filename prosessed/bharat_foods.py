@@ -324,7 +324,7 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
         filters.append(["Sales Team", "parenttype", "=", "Sales Order"])
 
     if customer_name:
-        filters.append(["customer", "=", customer_name])
+        filters.append(["customer_name", "=", customer_name])
 
     if workflow_state:
         filters.append(["workflow_state", "=", workflow_state])
