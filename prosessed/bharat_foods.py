@@ -358,8 +358,106 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
     return so_list
 
 
-#     so["file"] = {}
-#     pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
-#     so["file"]["filename"] = f'{si_name}.pdf'
-#     so["file"]["filecontent"] = pdf_file
-#     so["file"]["type"] =  'pdf'
+@frappe.whitelist()
+def get_order_details(order_id:str, limit:int=10, offset:int=0):
+    # SQL query to fetch order, sales team, and invoice details
+    so_details = frappe.db.sql(
+        """
+        SELECT
+            so.name AS order_id,
+            so.customer_name,
+            so.transaction_date AS order_date,
+            so.grand_total AS order_grand_total,
+            so.workflow_state AS order_workflow_status,
+            so.docstatus AS order_doc_status,
+
+            -- Fetch Sales Team Members (Salespersons)
+            GROUP_CONCAT(st.sales_person SEPARATOR ', ') AS sales_person_list,
+
+            si.name AS invoice_id,
+            si.grand_total AS invoice_total,
+            si.posting_date AS invoice_date,
+            si.docstatus AS invoice_doc_status,
+            si.due_date AS invoice_due_date,
+            si.workflow_state AS invoice_workflow_status,
+
+            sii.item_code AS item_name,
+            sii.qty AS item_quantity,
+            sii.uom,
+            sii.rate
+
+        FROM
+            `tabSales Order` AS so
+        LEFT JOIN
+            `tabSales Invoice Item` AS sii ON sii.sales_order = so.name
+        LEFT JOIN
+            `tabSales Invoice` AS si ON sii.parent = si.name
+
+        -- Join Sales Team table to get Salespersons for the Sales Order
+        LEFT JOIN
+            `tabSales Team` AS st ON st.parent = so.name
+
+        WHERE
+            so.name = %(sales_order_id)s
+
+        -- Pagination Filters
+        GROUP BY
+            so.name, si.name, sii.item_code
+        LIMIT %(limit)s OFFSET %(offset)s;
+        """,
+        {
+            "sales_order_id": order_id,
+            "limit": limit,
+            "offset": offset
+        },
+        as_dict=True
+    )
+
+    # Restructure the result
+    invoice_map = {}
+
+    for row in so_details:
+        invoice_id = row['invoice_id']
+
+        # Check if the invoice is already added, if not create a new entry
+        if invoice_id not in invoice_map:
+            invoice_map[invoice_id] = {
+                'invoice_id': invoice_id,
+                'invoice_total': row['invoice_total'],
+                'invoice_date': row['invoice_date'],
+                'invoice_doc_status': row['invoice_doc_status'],
+                'invoice_due_date': row['invoice_due_date'],
+                'invoice_workflow_status': row['invoice_workflow_status'],
+                'items': []
+            }
+
+        # Add the items to the relevant invoice
+        invoice_map[invoice_id]['items'].append({
+            'item_name': row['item_name'],
+            'item_quantity': row['item_quantity'],
+            'uom': row['uom'],
+            'rate': row['rate']
+        })
+
+    # Prepare the final result: order details with sales invoices as a list
+    result = {
+        'order_id': so_details[0]['order_id'] if so_details else None,
+        'customer_name': so_details[0]['customer_name'] if so_details else None,
+        'order_date': so_details[0]['order_date'] if so_details else None,
+        'order_grand_total': so_details[0]['order_grand_total'] if so_details else None,
+        'order_workflow_status': so_details[0]['order_workflow_status'] if so_details else None,
+        'order_doc_status': so_details[0]['order_doc_status'] if so_details else None,
+        'sales_person_list': so_details[0]['sales_person_list'] if so_details else None,
+        'invoices': list(invoice_map.values())
+    }
+
+    return result
+
+
+@frappe.whitelist()
+def get_sales_invoice_pdf(si_name):
+    pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
+
+    frappe.response["filename"] = f'{si_name}.pdf'
+    frappe.response["filecontent"] = pdf_file
+    frappe.response["type"] =  'pdf'
