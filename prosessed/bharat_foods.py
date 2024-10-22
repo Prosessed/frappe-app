@@ -420,7 +420,7 @@ def get_order_details(order_id:str, limit:int=10, offset:int=0):
         invoice_id = row['invoice_id']
 
         # Check if the invoice is already added, if not create a new entry
-        if invoice_id not in invoice_map:
+        if invoice_id and invoice_id not in invoice_map:
             invoice_map[invoice_id] = {
                 'invoice_id': invoice_id,
                 'invoice_total': row['invoice_total'],
