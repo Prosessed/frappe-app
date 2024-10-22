@@ -455,9 +455,9 @@ def get_order_details(order_id:str, limit:int=10, offset:int=0):
 
 
 @frappe.whitelist()
-def get_sales_invoice_pdf(si_name):
-    pdf_file = frappe.get_print(doctype="Sales Invoice", name=si_name, print_format="Tax Invoice", as_pdf=True)
+def get_sales_invoice_pdf(invoice_id):
+    pdf_file = frappe.get_print(doctype="Sales Invoice", name=invoice_id, print_format="Tax Invoice", as_pdf=True)
 
-    frappe.response["filename"] = f'{si_name}.pdf'
+    frappe.response["filename"] = f'{invoice_id}.pdf'
     frappe.response["filecontent"] = pdf_file
     frappe.response["type"] =  'pdf'
