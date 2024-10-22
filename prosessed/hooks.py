@@ -133,7 +133,7 @@ doc_events = {
 	    "on_update_after_submit": "prosessed.crud_events.update_sales_order_workflow_state"
 	},
 	"Purchase Receipt": {
-	    "before_submit": "prosessed.crud_events.create_item_wise_batch",
+	    "before_submit" : "prosessed.crud_events.create_item_wise_batch",
 	    "on_submit": "prosessed.crud_events.update_purchase_order_workflow_state"
 	},
 	"Purchase Order": {
@@ -143,7 +143,8 @@ doc_events = {
 		"before_save" : "prosessed.crud_events.before_save_batch"
 	},
 	"Stock Entry": {
-		"before_submit": "prosessed.crud_events.create_item_wise_batch"
+		"before_submit" : "prosessed.crud_events.create_item_wise_batch",
+		"on_submit" : "prosessed.crud_events.update_work_order_workflow_state"
 	}
 }
 
