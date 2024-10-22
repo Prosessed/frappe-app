@@ -336,6 +336,9 @@ def get_sales_person_orders(sales_person:str=None, customer_name:str=None, workf
 
     if so_list:
         for so in so_list:
+            if sales_team_list := frappe.db.get_list("Sales Team", {"parent":so.get('name')}, 'sales_person'):
+                so["sales_persons_involved"] = sales_team_list
+
             if so.get('workflow_state') and so.get('workflow_state') == 'Invoiced':
                 if si_list := frappe.db.get_list("Sales Invoice Item",
                     {"sales_order":so.get('name'), "docstatus":1}, pluck='parent'):
