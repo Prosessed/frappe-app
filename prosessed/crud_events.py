@@ -108,3 +108,4 @@ def create_item_wise_batch(doc, method=None):
                             )
                         )
                 item.batch_no = batch_no
+                frappe.throw("error", batch_no)
