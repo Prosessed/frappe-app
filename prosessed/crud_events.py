@@ -116,7 +116,7 @@ def create_batch(doc, method=None):
             return
 
         for item in doc.items:
-            if not frappe.db.get_value('Item', item.item_code, "create_new_batch") and not item.batch_no:
+            if not frappe.db.get_value('Item', item.item_code, "create_new_batch") and not item.batch_no and not item.serial_and_batch_bundle:
                 if not item.custom_vendor_batch:
                     frappe.throw("Vendor Batch Error", f"Enter Vendor Batch on Item {item.item_code} for Batch Creation")
 
