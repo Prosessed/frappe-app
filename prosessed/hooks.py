@@ -126,7 +126,7 @@ app_license = "mit"
 
 doc_events = {
 	"Sales Invoice": {
-		"validate": "prosessed.crud_events.update_sales_order_workflow_state",
+		"before_submit": "prosessed.crud_events.update_sales_order_workflow_state",
 		"on_update_after_submit": "prosessed.crud_events.update_sales_order_workflow_state"
 	},
 	"Work Order": {

@@ -13,7 +13,7 @@ def update_sales_order_workflow_state(doc, method=None):
                 sales_order = item.sales_order
                 break
 
-    if sales_order and (doc.docstatus == 0 and method == "validate") or (
+    if sales_order and (doc.docstatus == 0 and method == "before_submit") or (
         doc.doctype == "Sales Invoice" and doc.docstatus == 1) or (
         doc.doctype == "Work Order" and doc.workflow_state == "Production Completed"):
         frappe.db.set_value("Sales Order",
@@ -136,5 +136,3 @@ def create_batch(doc, method=None):
                             )
 
                     item.batch_no = batch_no
-
-                frappe.log_error("batch no", f"{item.item_name} and {item.batch_no}")
