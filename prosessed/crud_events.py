@@ -47,15 +47,12 @@ def update_purchase_order_workflow_state(doc, method=None):
 
 def update_work_order_workflow_state(doc, method=None):
     if doc.stock_entry_type in ["Material Transfer", "Manufacture", "Material Transfer for Manufacture"] and doc.work_order:
-        workflow_state = "In Kitchen" if doc.stock_entry_type == "Material Transfer" else "Production Completed"
-        frappe.db.set_value("Work Order",
-            {
-                "name":doc.work_order
-            },
-            "workflow_state",
-            workflow_state,
-            update_modified=False
-        )
+        workflow_state = "In Kitchen" if doc.stock_entry_type in ["Material Transfer", "Material Transfer for Manufacture"] else "Production Completed"
+
+        doc = frappe.get_doc("Work Order", doc.work_order)
+        doc.workflow_state = workflow_state
+        doc.save()
+        doc.submit()
 
 
 def create_purchase_receipt(doc, method=None):
