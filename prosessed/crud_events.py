@@ -116,24 +116,25 @@ def create_batch(doc, method=None):
             return
 
         for item in doc.items:
-            if not frappe.db.get_value('Item', item.item_code, "create_new_batch") and not item.batch_no and not item.serial_and_batch_bundle:
-                if not item.custom_vendor_batch:
-                    frappe.throw("Vendor Batch Error", f"Enter Vendor Batch on Item {item.item_code} for Batch Creation")
+            if not frappe.db.get_value('Item', item.item_code, "create_new_batch") and not item.batch_no:
+                # if not item.custom_vendor_batch:
+                #     frappe.throw("Vendor Batch Error", f"Enter Vendor Batch on Item {item.item_code} for Batch Creation")
 
-                if not item.custom_expiry_date:
-                    frappe.throw("Expiry Date Error", f"Enter Expiry Date on Item {item.item_code} for Batch Creation")
-
-                batch_no = make_batch(
-                            frappe._dict(
-                                {
-                                    "item": item.item_code,
-                                    "batch_id": item.custom_vendor_batch,
-                                    "expiry_date": item.custom_expiry_date,
-                                    "reference_doctype": doc.doctype,
-                                    "reference_name": doc.name,
-                                }
+                # if not item.custom_expiry_date:
+                #     frappe.throw("Expiry Date Error", f"Enter Expiry Date on Item {item.item_code} for Batch Creation")
+                if item.custom_vendor_batch and item.custom_expiry_date:
+                    batch_no = make_batch(
+                                frappe._dict(
+                                    {
+                                        "item": item.item_code,
+                                        "batch_id": item.custom_vendor_batch,
+                                        "expiry_date": item.custom_expiry_date,
+                                        "reference_doctype": doc.doctype,
+                                        "reference_name": doc.name,
+                                    }
+                                )
                             )
-                        )
 
-                item.batch_no = batch_no
+                    item.batch_no = batch_no
+
                 frappe.log_error("batch no", f"{item.item_name} and {item.batch_no}")
