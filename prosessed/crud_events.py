@@ -13,7 +13,7 @@ def update_sales_order_workflow_state(doc, method=None):
                 sales_order = item.sales_order
                 break
 
-    if sales_order and (doc.docstatus == 0 and method == "before_submit") or (
+    if sales_order and (
         doc.doctype == "Sales Invoice" and doc.docstatus == 1) or (
         doc.doctype == "Work Order" and doc.workflow_state == "Production Completed"):
         frappe.db.set_value("Sales Order",
