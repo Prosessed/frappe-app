@@ -85,7 +85,7 @@ def before_save_batch(doc, method=None):
 def create_item_wise_batch(doc, method=None):
     if doc.doctype in ["Purchase Receipt", "Stock Entry"]:
 
-        if doc.doctype == "Stock Entry" and doc.stock_entry_type not in ["Maufacture", "Material Receipt", "Repack"]:
+        if doc.doctype == "Stock Entry" and doc.stock_entry_type not in ["Manufacture", "Material Receipt", "Repack"]:
             return
 
         for item in doc.items:
@@ -112,7 +112,7 @@ def create_item_wise_batch(doc, method=None):
 def create_batch(doc, method=None):
      if doc.doctype == "Stock Entry":
 
-        if doc.stock_entry_type not in ["Maufacture", "Material Receipt", "Repack"]:
+        if doc.stock_entry_type not in ["Manufacture", "Material Receipt", "Repack"]:
             return
 
         for item in doc.items:
@@ -136,3 +136,4 @@ def create_batch(doc, method=None):
                         )
 
                 item.batch_no = batch_no
+                frappe.log_error("batch no", f"{item.item_name} and {item.batch_no}")
