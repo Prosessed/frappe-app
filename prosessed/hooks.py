@@ -143,7 +143,8 @@ doc_events = {
 		"before_save" : "prosessed.crud_events.before_save_batch"
 	},
 	"Stock Entry": {
-		"before_submit" : "prosessed.crud_events.create_item_wise_batch",
+		"validate" : "prosessed.crud_events.create_batch",
+		# "before_submit" : "prosessed.crud_events.create_item_wise_batch",
 		"on_submit" : "prosessed.crud_events.update_work_order_workflow_state"
 	}
 }
