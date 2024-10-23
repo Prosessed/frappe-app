@@ -137,7 +137,7 @@ def check_si_against_so(so_name:str):
 
 
 @frappe.whitelist()
-def get_sales_person_customers(sales_person:str, limit_start:int=0, limit_page_length:int=100):
+def get_sales_person_customers(sales_person:str, limit_start:int=0, limit_page_length:int=20):
     """Get customer list assigned for specific sales person
 
     Args:
@@ -461,3 +461,146 @@ def get_sales_invoice_pdf(invoice_id):
     frappe.response["filename"] = f'{invoice_id}.pdf'
     frappe.response["filecontent"] = pdf_file
     frappe.response["type"] =  'pdf'
+
+
+# @frappe.whitelist()
+# def get_customer_listing(sales_person:str=None, payment_terms:str=None, limit:int=10, offset:int=1):
+#     # Parse the filters
+#     sales_person = frappe.utils.get_fullname(sales_person)
+
+#     # SQL query to fetch customer data
+#     query = """
+#         SELECT
+#             c.customer_name,
+#             c.customer_group,
+#             c.phone,
+#             c.email_id,
+#             COUNT(so.name) as total_sales_orders,
+#             GROUP_CONCAT(DISTINCT sp.sales_person_name) as sales_persons,
+#             GROUP_CONCAT(DISTINCT a.address_line1, ' ', a.city) as addresses,
+#             c.payment_terms,
+#             c.payment_terms_template
+#         FROM `tabCustomer` c
+#         LEFT JOIN `tabSales Order` so ON c.name = so.customer
+#         LEFT JOIN `tabSales Team` st ON so.name = st.parent
+#         LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
+#         LEFT JOIN `tabDynamic Link` dl ON dl.link_name = c.name AND dl.link_doctype = 'Customer'
+#         LEFT JOIN `tabAddress` a ON dl.parent = a.name
+#         WHERE c.disabled = 0
+#     """
+
+#     # Apply filters if provided
+#     if sales_person:
+#         query += " AND sp.sales_person_name = %(sales_person)s"
+#     if payment_terms:
+#         query += " AND c.payment_terms_template = %(payment_terms)s"
+
+#     query += """
+#         GROUP BY c.name
+#         ORDER BY c.customer_name ASC
+#         LIMIT %(limit)s OFFSET %(offset)s
+#     """
+
+#     # Execute the query with filters
+#     data = frappe.db.sql(query, {
+#         'sales_person': sales_person,
+#         'payment_terms': payment_terms,
+#         'limit': limit,
+#         'offset': offset
+#     }, as_dict=True)
+
+#     # Total records count
+#     count_query = """
+#         SELECT COUNT(DISTINCT c.name)
+#         FROM `tabCustomer` c
+#         LEFT JOIN `tabSales Order` so ON c.name = so.customer
+#         LEFT JOIN `tabSales Team` st ON so.name = st.parent
+#         LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
+#         LEFT JOIN `tabDynamic Link` dl ON dl.link_name = c.name AND dl.link_doctype = 'Customer'
+#         LEFT JOIN `tabAddress` a ON dl.parent = a.name
+#         WHERE c.disabled = 0
+#     """
+#     if sales_person:
+#         count_query += " AND sp.sales_person_name = %(sales_person)s"
+#     if payment_terms:
+#         count_query += " AND c.payment_terms_template = %(payment_terms)s"
+
+#     total_records = frappe.db.sql(count_query, {
+#         'sales_person': sales_person,
+#         'payment_terms': payment_terms
+#     })[0][0]
+
+#     return {
+#         'data': data,
+#         'total_records': total_records
+#     }
+
+
+def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_length:int=20, limit_start:int=0):
+    sales_person_name = frappe.utils.get_fullname(sales_person)
+    customers = []
+    filters = [["disabled", "=", 0]]
+
+    if sales_person:
+        filters.append(["Sales Team", "sales_person", "=", sales_person_name])
+        filters.append(["Sales Team", "parenttype", "=", "Customer"])
+
+    if payment_terms:
+        filters.append(["payment_terms", "=", payment_terms])
+
+    # Fetch all customers at once
+    customer_list = frappe.db.get_list("Customer", filters=filters, fields=["*"],
+                     limit_start=limit_start, limit_page_length=limit_page_length)
+
+    for customer in customer_list:
+        customer_name = customer.get('name')
+        sales_persons_involved = []
+
+        if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_name, "docstatus":1}, pluck='sales_person'):
+            sales_persons_involved.append(sales_team_list)
+
+        total_so_count = frappe.db.count("Sales Order", {"customer":customer_name})
+
+        address_list = frappe.get_list(
+            "Address",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Address"]],
+            fields=["address_title","address_type","address_line1","address_line2",
+                    "city","state","country","pincode","email_id","phone","fax",
+                    "is_primary_address","is_shipping_address","disabled","custom_note", "creation"],
+            order_by="is_primary_address DESC, creation ASC",
+        )
+
+        email_id = ''
+        if not customer.get('email') and address_list:
+            email_id = address_list[0]["email_id"]
+
+
+        contact_list = frappe.get_list(
+            "Contact",
+            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "parenttype", "=", "Contact"]],
+            fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact", "creation"],
+            order_by="is_primary_contact DESC, creation ASC",
+        )
+
+        phone = ''
+        if not customer.get('mobile_no') and contact_list:
+            phone = contact_list[0]['phone']
+
+        customers.append({
+            "customer_name": customer_name,
+            "customer_group": customer.get('customer_group', ''),
+            "phone_no": phone,
+            "email": email_id,
+            "customer_type": customer.get('customer_type', ''),
+            "address_list": address_list,
+            "contact_list": contact_list,
+            "payment_terms": customer.get('payment_terms', ''),
+            "total_so_count": total_so_count if total_so_count else 0,
+            "sales_persons": sales_persons_involved
+        })
+
+    return customers
