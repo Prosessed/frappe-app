@@ -536,6 +536,7 @@ def get_sales_invoice_pdf(invoice_id):
 #     }
 
 
+@frappe.whitelist()
 def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_length:int=20, limit_start:int=0):
     sales_person_name = frappe.utils.get_fullname(sales_person)
     customers = []
