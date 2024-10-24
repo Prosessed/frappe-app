@@ -537,10 +537,12 @@ def get_sales_invoice_pdf(invoice_id):
 
 
 @frappe.whitelist()
-def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_length:int=20, limit_start:int=0):
+def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms:str=None, limit_page_length:int=20, limit_start:int=0):
     sales_person_name = frappe.utils.get_fullname(sales_person)
     customers = []
     filters = [["disabled", "=", 0]]
+    if customer_id:
+        filters.append(["name", "=", customer_id])
 
     if sales_person:
         filters.append(["Sales Team", "sales_person", "=", sales_person_name])
@@ -549,23 +551,25 @@ def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_
     if payment_terms:
         filters.append(["payment_terms", "=", payment_terms])
 
+    fields = ["name","customer_name","customer_group","customer_type","payment_terms"]
+
     # Fetch all customers at once
-    customer_list = frappe.db.get_list("Customer", filters=filters, fields=["*"],
+    customer_list = frappe.db.get_list("Customer", filters=filters, fields=fields,
                      limit_start=limit_start, limit_page_length=limit_page_length)
 
     for customer in customer_list:
-        customer_name = customer.get('name')
+        customer_id = customer.get('name')
         sales_persons_involved = []
 
-        if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_name, "docstatus":1}, pluck='sales_person'):
+        if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_id, "docstatus":1}, pluck='sales_person'):
             sales_persons_involved.append(sales_team_list)
 
-        total_so_count = frappe.db.count("Sales Order", {"customer":customer_name})
+        total_so_count = frappe.db.count("Sales Order", {"customer":customer_id})
 
         address_list = frappe.get_list(
             "Address",
             filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "link_name", "=", customer_id],
                      ["Dynamic Link", "parenttype", "=", "Address"]],
             fields=["address_title","address_type","address_line1","address_line2",
                     "city","state","country","pincode","email_id","phone","fax",
@@ -581,7 +585,7 @@ def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_
         contact_list = frappe.get_list(
             "Contact",
             filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_name],
+                     ["Dynamic Link", "link_name", "=", customer_id],
                      ["Dynamic Link", "parenttype", "=", "Contact"]],
             fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact", "creation"],
             order_by="is_primary_contact DESC, creation ASC",
@@ -592,7 +596,7 @@ def get_customer_list(sales_person:str=None, payment_terms:str=None, limit_page_
             phone = contact_list[0]['phone']
 
         customers.append({
-            "customer_name": customer_name,
+            "customer_name": customer.get('customer_name', ''),
             "customer_group": customer.get('customer_group', ''),
             "phone_no": phone,
             "email": email_id,
