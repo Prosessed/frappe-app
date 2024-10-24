@@ -584,7 +584,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
                 a.city, a.state, a.country, a.pincode, a.email_id, a.phone, a.fax, a.is_primary_address, a.is_shipping_address,
                 a.disabled, a.creation
             FROM `tabAddress` a
-            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
+            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.parent
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name = %(customer_id)s
             AND dl.parenttype = 'Address'
@@ -614,7 +614,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
                 c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
                 c.is_primary_contact, c.is_billing_contact, c.creation
             FROM `tabContact` c
-            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name = %(customer_id)s
             AND dl.parenttype = 'Contact'
@@ -630,6 +630,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
 
         customers.append({
             "customer_name": customer.get('customer_name', ''),
+            "customer_code": customer_id,
             "customer_group": customer.get('customer_group', ''),
             "phone_no": phone,
             "email": email_id,
@@ -672,17 +673,6 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
 
     customer_ids = [c['name'] for c in customer_list]
 
-    # Fetch related addresses in a single query
-    # address_list = frappe.get_list(
-    #     "Address",
-    #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-    #              ["Dynamic Link", "link_name", "in", customer_ids]],
-    #     fields=["name", "address_title", "address_type", "address_line1", "address_line2",
-    #             "city", "state", "country", "pincode", "email_id", "phone", "fax",
-    #             "is_primary_address", "is_shipping_address", "disabled", "custom_note", "creation"],
-    #     order_by="is_primary_address DESC, creation ASC"
-    # )
-
     address_list = frappe.db.sql(
         """
             SELECT
@@ -690,7 +680,7 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
                 a.city, a.state, a.country, a.pincode, a.email_id, a.phone, a.fax, a.is_primary_address, a.is_shipping_address,
                 a.disabled, a.creation
             FROM `tabAddress` a
-            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
+            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.parent
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name IN %(customer_ids)s
             AND dl.parenttype = 'Address'
@@ -704,15 +694,6 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
     for addr in address_list:
         address_by_customer[addr['link_name']].append(addr)
 
-    # Fetch related contacts in a single query
-    # contact_list = frappe.get_list(
-    #     "Contact",
-    #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-    #              ["Dynamic Link", "link_name", "in", customer_ids]],
-    #     fields=["name", "full_name", "phone", "mobile_no", "image", "is_primary_contact",
-    #             "is_billing_contact", "creation"],
-    #     order_by="is_primary_contact DESC, creation ASC"
-    # )
 
     contact_list = frappe.db.sql(
         """
@@ -720,7 +701,7 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
                 c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
                 c.is_primary_contact, c.is_billing_contact, c.creation
             FROM `tabContact` c
-            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name IN %(customer_ids)s
             AND dl.parenttype = 'Contact'
