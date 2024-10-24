@@ -577,6 +577,23 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             order_by="is_primary_address DESC, creation ASC",
         )
 
+        address_list = frappe.db.sql(
+        """
+            SELECT
+                a.name, dl.link_name, a.address_title, a.address_type, a.address_line1, a.address_line2,
+                a.city, a.state, a.country, a.pincode, a.email_id, a.phone, a.fax, a.is_primary_address, a.is_shipping_address,
+                a.disabled, a.creation
+            FROM `tabAddress` a
+            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
+            WHERE dl.link_doctype = 'Customer'
+            AND dl.link_name IN %(customer_id)s
+            AND dl.parenttype = 'Contact'
+            ORDER BY a.is_primary_address DESC, a.creation ASC
+        """,
+        {"customer_id": customer_id},  # Convert customer_ids to a tuple for SQL IN clause
+        as_dict=1
+    )
+
         email_id = ''
         if not customer.get('email') and address_list:
             email_id = address_list[0]["email_id"]
@@ -593,16 +610,19 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
 
         contact_list = frappe.db.sql(
         """
-            SELECT c.name c.full_name c.phone c.mobile_no c.image c.is_primary_contact c.is_billing_contact c.creation
+            SELECT
+                c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
+                c.is_primary_contact, c.is_billing_contact, c.creation
             FROM `tabContact` c
-            LEFT JOIN `tabDynamic Link` dl
-            ON c.name = dl.link_name
-            WHERE dl.link_doctype='Customer' AND
-			dl.link_name=%s  and
-			dl.parenttype='Contact'
-        """,(customer_id),
-            as_dict=1
-        )
+            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+            WHERE dl.link_doctype = 'Customer'
+            AND dl.link_name IN %(customer_id)s
+            AND dl.parenttype = 'Contact'
+            ORDER BY a.is_primary_contact DESC, a.creation ASC
+        """,
+        {"customer_id": customer_id},  # Convert customer_ids to a tuple for SQL IN clause
+        as_dict=1
+    )
 
         phone = ''
         if not customer.get('mobile_no') and contact_list:
