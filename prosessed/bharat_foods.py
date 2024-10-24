@@ -559,10 +559,10 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
 
     for customer in customer_list:
         customer_id = customer.get('name')
-        sales_persons_involved = []
+        # sales_persons_involved = []
 
-        if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_id, "docstatus":1}, pluck='sales_person'):
-            sales_persons_involved.append(sales_team_list)
+        # if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_id, "docstatus":1}, pluck='sales_person'):
+        #     sales_persons_involved.append(sales_team_list)
 
         total_so_count = frappe.db.count("Sales Order", {"customer":customer_id})
 
@@ -605,7 +605,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             "contact_list": contact_list,
             "payment_terms": customer.get('payment_terms', ''),
             "total_so_count": total_so_count if total_so_count else 0,
-            "sales_persons": sales_persons_involved
+            # "sales_persons": sales_persons_involved
         })
 
     return customers
