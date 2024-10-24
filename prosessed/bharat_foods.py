@@ -463,79 +463,6 @@ def get_sales_invoice_pdf(invoice_id):
     frappe.response["type"] =  'pdf'
 
 
-# @frappe.whitelist()
-# def get_customer_listing(sales_person:str=None, payment_terms:str=None, limit:int=10, offset:int=1):
-#     # Parse the filters
-#     sales_person = frappe.utils.get_fullname(sales_person)
-
-#     # SQL query to fetch customer data
-#     query = """
-#         SELECT
-#             c.customer_name,
-#             c.customer_group,
-#             c.phone,
-#             c.email_id,
-#             COUNT(so.name) as total_sales_orders,
-#             GROUP_CONCAT(DISTINCT sp.sales_person_name) as sales_persons,
-#             GROUP_CONCAT(DISTINCT a.address_line1, ' ', a.city) as addresses,
-#             c.payment_terms,
-#             c.payment_terms_template
-#         FROM `tabCustomer` c
-#         LEFT JOIN `tabSales Order` so ON c.name = so.customer
-#         LEFT JOIN `tabSales Team` st ON so.name = st.parent
-#         LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
-#         LEFT JOIN `tabDynamic Link` dl ON dl.link_name = c.name AND dl.link_doctype = 'Customer'
-#         LEFT JOIN `tabAddress` a ON dl.parent = a.name
-#         WHERE c.disabled = 0
-#     """
-
-#     # Apply filters if provided
-#     if sales_person:
-#         query += " AND sp.sales_person_name = %(sales_person)s"
-#     if payment_terms:
-#         query += " AND c.payment_terms_template = %(payment_terms)s"
-
-#     query += """
-#         GROUP BY c.name
-#         ORDER BY c.customer_name ASC
-#         LIMIT %(limit)s OFFSET %(offset)s
-#     """
-
-#     # Execute the query with filters
-#     data = frappe.db.sql(query, {
-#         'sales_person': sales_person,
-#         'payment_terms': payment_terms,
-#         'limit': limit,
-#         'offset': offset
-#     }, as_dict=True)
-
-#     # Total records count
-#     count_query = """
-#         SELECT COUNT(DISTINCT c.name)
-#         FROM `tabCustomer` c
-#         LEFT JOIN `tabSales Order` so ON c.name = so.customer
-#         LEFT JOIN `tabSales Team` st ON so.name = st.parent
-#         LEFT JOIN `tabSales Person` sp ON st.sales_person = sp.name
-#         LEFT JOIN `tabDynamic Link` dl ON dl.link_name = c.name AND dl.link_doctype = 'Customer'
-#         LEFT JOIN `tabAddress` a ON dl.parent = a.name
-#         WHERE c.disabled = 0
-#     """
-#     if sales_person:
-#         count_query += " AND sp.sales_person_name = %(sales_person)s"
-#     if payment_terms:
-#         count_query += " AND c.payment_terms_template = %(payment_terms)s"
-
-#     total_records = frappe.db.sql(count_query, {
-#         'sales_person': sales_person,
-#         'payment_terms': payment_terms
-#     })[0][0]
-
-#     return {
-#         'data': data,
-#         'total_records': total_records
-#     }
-
-
 @frappe.whitelist()
 def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms:str=None, limit_page_length:int=20, limit_start:int=0):
     sales_person_name = frappe.utils.get_fullname(sales_person)
@@ -559,23 +486,12 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
 
     for customer in customer_list:
         customer_id = customer.get('name')
-        # sales_persons_involved = []
+        sales_persons_involved = []
 
-        # if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_id, "docstatus":1}, pluck='sales_person'):
-        #     sales_persons_involved.append(sales_team_list)
+        if sales_team_list := frappe.db.get_list("Sales Team", {"parent":customer_id, "docstatus":1}, pluck='sales_person'):
+            sales_persons_involved.append(sales_team_list)
 
         total_so_count = frappe.db.count("Sales Order", {"customer":customer_id})
-
-        # address_list = frappe.get_list(
-        #     "Address",
-        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-        #              ["Dynamic Link", "link_name", "=", customer_id],
-        #              ["Dynamic Link", "parenttype", "=", "Address"]],
-        #     fields=["address_title","address_type","address_line1","address_line2",
-        #             "city","state","country","pincode","email_id","phone","fax",
-        #             "is_primary_address","is_shipping_address","disabled","custom_note", "creation"],
-        #     order_by="is_primary_address DESC, creation ASC",
-        # )
 
         address_list = frappe.db.sql(
         """
@@ -599,15 +515,6 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             email_id = address_list[0]["email_id"]
 
 
-        # contact_list = frappe.get_list(
-        #     "Contact",
-        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-        #              ["Dynamic Link", "link_name", "=", customer_id],
-        #              ["Dynamic Link", "parenttype", "=", "Contact"]],
-        #     fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact", "creation"],
-        #     order_by="is_primary_contact DESC, creation ASC",
-        # )
-
         contact_list = frappe.db.sql(
         """
             SELECT
@@ -620,7 +527,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             AND dl.parenttype = 'Contact'
             ORDER BY c.is_primary_contact DESC, c.creation ASC
         """,
-        {"customer_id": customer_id},  # Convert customer_ids to a tuple for SQL IN clause
+        {"customer_id": customer_id},
         as_dict=1
     )
 
@@ -639,105 +546,7 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             "contact_list": contact_list,
             "payment_terms": customer.get('payment_terms', ''),
             "total_so_count": total_so_count if total_so_count else 0,
-            # "sales_persons": sales_persons_involved
-        })
-
-    return customers
-
-
-@frappe.whitelist()
-def get_customer_lists(sales_person: str = None, customer_id: str = None, payment_terms: str = None, limit_page_length: int = 20, limit_start: int = 0):
-    sales_person_name = frappe.utils.get_fullname(sales_person) if sales_person else None
-    customers = []
-    filters = [["disabled", "=", 0]]
-
-    if customer_id:
-        filters.append(["name", "=", customer_id])
-
-    if sales_person_name:
-        filters.append(["Sales Team", "sales_person", "=", sales_person_name])
-        filters.append(["Sales Team", "parenttype", "=", "Customer"])
-
-    if payment_terms:
-        filters.append(["payment_terms", "=", payment_terms])
-
-    fields = ["name", "customer_name", "customer_group", "customer_type", "payment_terms"]
-
-    # Fetch customer list with pagination
-    customer_list = frappe.db.get_list("Customer", filters=filters, fields=fields,
-                                       limit_start=limit_start, limit_page_length=limit_page_length)
-
-    # If no customers, return early
-    if not customer_list:
-        return []
-
-    customer_ids = [c['name'] for c in customer_list]
-
-    address_list = frappe.db.sql(
-        """
-            SELECT
-                a.name, dl.link_name, a.address_title, a.address_type, a.address_line1, a.address_line2,
-                a.city, a.state, a.country, a.pincode, a.email_id, a.phone, a.fax, a.is_primary_address, a.is_shipping_address,
-                a.disabled, a.creation
-            FROM `tabAddress` a
-            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.parent
-            WHERE dl.link_doctype = 'Customer'
-            AND dl.link_name IN %(customer_ids)s
-            AND dl.parenttype = 'Address'
-        """,
-        {"customer_ids": tuple(customer_ids)},  # Convert customer_ids to a tuple for SQL IN clause
-        as_dict=1
-    )
-
-    # Group addresses by customer ID
-    address_by_customer = {customer_id: [] for customer_id in customer_ids}
-    for addr in address_list:
-        address_by_customer[addr['link_name']].append(addr)
-
-
-    contact_list = frappe.db.sql(
-        """
-            SELECT
-                c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
-                c.is_primary_contact, c.is_billing_contact, c.creation
-            FROM `tabContact` c
-            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.parent
-            WHERE dl.link_doctype = 'Customer'
-            AND dl.link_name IN %(customer_ids)s
-            AND dl.parenttype = 'Contact'
-        """,
-        {"customer_ids": tuple(customer_ids)},  # Convert customer_ids to a tuple for SQL IN clause
-        as_dict=1
-    )
-
-
-    # Group contacts by customer ID
-    contact_by_customer = {customer_id: [] for customer_id in customer_ids}
-    for contact in contact_list:
-            contact_by_customer[contact['link_name']].append(contact)
-
-    # Fetch sales order counts in bulk
-    sales_order_counts = frappe.db.get_all("Sales Order", filters={"customer": ["in", customer_ids]},
-                                           fields=["customer", "count(name) as total_so_count"],
-                                           group_by="customer")
-
-    so_count_by_customer = {so['customer']: so['total_so_count'] for so in sales_order_counts}
-
-    # Build the final customer list
-    for customer in customer_list:
-        customer_id = customer.get('name')
-
-        customers.append({
-            "customer_name": customer.get('customer_name', ''),
-            "customer_code": customer_id,
-            "customer_group": customer.get('customer_group', ''),
-            "phone_no": contact_by_customer[customer_id][0]['phone'] if contact_by_customer[customer_id] else '',
-            "email": address_by_customer[customer_id][0]['email_id'] if address_by_customer[customer_id] else '',
-            "customer_type": customer.get('customer_type', ''),
-            "address_list": address_by_customer.get(customer_id, []),
-            "contact_list": contact_by_customer.get(customer_id, []),
-            "payment_terms": customer.get('payment_terms', ''),
-            "total_so_count": so_count_by_customer.get(customer_id, 0),
+            "sales_persons": sales_persons_involved
         })
 
     return customers
