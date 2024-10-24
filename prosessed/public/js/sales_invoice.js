@@ -1,4 +1,5 @@
 frappe.ui.form.on('Sales Invoice', {
+
     onload: function(frm) {
         toggle_stock_entry_button(frm);
     },
@@ -7,6 +8,7 @@ frappe.ui.form.on('Sales Invoice', {
     },
     refresh: function(frm) {
         frm.add_custom_button(__('Add Stock'), function() {
+
             if (!frm.doc.items || !Array.isArray(frm.doc.items)) {
                 frappe.msgprint(__('No items found in the Sales Invoice.'));
                 return;
@@ -84,7 +86,7 @@ frappe.ui.form.on('Sales Invoice', {
                     // Prepare the stock entry data
                     const stock_entry_data = {
                         doctype: 'Stock Entry',
-                        stock_entry_type: 'Material Receipt', 
+                        stock_entry_type: 'Material Receipt',  // Specify the type
                         company: frm.doc.company || 'Your Company Name',
                         posting_date: frappe.datetime.now_date(),
                         posting_time: frappe.datetime.now_time(),
@@ -132,17 +134,11 @@ frappe.ui.form.on('Sales Invoice', {
                         }
                     });
                 },
-                primary_action_label: __('Submit'),
-                // Set dialog size
-                size: 'large' // Options: 'small', 'medium', 'large'
+                primary_action_label: __('Submit')
             });
 
             // Show the dialog
             dialog.show();
-
-            // Add custom CSS to increase the size of the table fields
-            dialog.get_field('items_table').$wrapper.find('.grid-row').css('min-height', '40px'); // Adjust height
-            dialog.get_field('items_table').$wrapper.find('input').css('width', '300px'); // Adjust width for input fields
         });
     }
 });
@@ -157,3 +153,4 @@ function toggle_stock_entry_button(frm) {
         $('button[data-label="Create%20Stock%20Entry"]').show();
     }
 }
+
