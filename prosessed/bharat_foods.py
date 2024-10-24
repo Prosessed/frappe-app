@@ -586,8 +586,8 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             FROM `tabAddress` a
             LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
             WHERE dl.link_doctype = 'Customer'
-            AND dl.link_name IN %(customer_id)s
-            AND dl.parenttype = 'Contact'
+            AND dl.link_name = %(customer_id)s
+            AND dl.parenttype = 'Address'
             ORDER BY a.is_primary_address DESC, a.creation ASC
         """,
         {"customer_id": customer_id},  # Convert customer_ids to a tuple for SQL IN clause
@@ -616,9 +616,9 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             FROM `tabContact` c
             LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
             WHERE dl.link_doctype = 'Customer'
-            AND dl.link_name IN %(customer_id)s
+            AND dl.link_name = %(customer_id)s
             AND dl.parenttype = 'Contact'
-            ORDER BY a.is_primary_contact DESC, a.creation ASC
+            ORDER BY c.is_primary_contact DESC, c.creation ASC
         """,
         {"customer_id": customer_id},  # Convert customer_ids to a tuple for SQL IN clause
         as_dict=1
@@ -693,7 +693,7 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
             LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name IN %(customer_ids)s
-            AND dl.parenttype = 'Contact'
+            AND dl.parenttype = 'Address'
         """,
         {"customer_ids": tuple(customer_ids)},  # Convert customer_ids to a tuple for SQL IN clause
         as_dict=1
