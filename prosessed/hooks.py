@@ -28,7 +28,9 @@ app_include_css = "/assets/prosessed/css/bharat_foods.css"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Sales Order" : "public/js/sales_order.js"}
+doctype_js = {"Sales Order" : "public/js/sales_order.js",
+            "Sales Invoice" : "public/js/sales_invoice.js"
+			}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
