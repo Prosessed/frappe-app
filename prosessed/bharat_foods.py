@@ -666,10 +666,11 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
     address_list = frappe.db.sql(
         """
             SELECT
-                c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
-                c.is_primary_contact, c.is_billing_contact, c.creation
-            FROM `tabAddress` c
-            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+                a.name, dl.link_name, a.address_title, a.address_type, a.address_line1, a.address_line2,
+                a.city, a.state, a.country, a.pincode, a.email_id, a.phone, a.fax, a.is_primary_address, a.is_shipping_address,
+                a.disabled, a.creation
+            FROM `tabAddress` a
+            LEFT JOIN `tabDynamic Link` dl ON a.name = dl.link_name
             WHERE dl.link_doctype = 'Customer'
             AND dl.link_name IN %(customer_ids)s
             AND dl.parenttype = 'Contact'
@@ -727,6 +728,7 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
 
         customers.append({
             "customer_name": customer.get('customer_name', ''),
+            "customer_code": customer_id,
             "customer_group": customer.get('customer_group', ''),
             "phone_no": contact_by_customer[customer_id][0]['phone'] if contact_by_customer[customer_id] else '',
             "email": address_by_customer[customer_id][0]['email_id'] if address_by_customer[customer_id] else '',
