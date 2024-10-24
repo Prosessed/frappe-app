@@ -566,16 +566,16 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
 
         total_so_count = frappe.db.count("Sales Order", {"customer":customer_id})
 
-        address_list = frappe.get_list(
-            "Address",
-            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_id],
-                     ["Dynamic Link", "parenttype", "=", "Address"]],
-            fields=["address_title","address_type","address_line1","address_line2",
-                    "city","state","country","pincode","email_id","phone","fax",
-                    "is_primary_address","is_shipping_address","disabled","custom_note", "creation"],
-            order_by="is_primary_address DESC, creation ASC",
-        )
+        # address_list = frappe.get_list(
+        #     "Address",
+        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+        #              ["Dynamic Link", "link_name", "=", customer_id],
+        #              ["Dynamic Link", "parenttype", "=", "Address"]],
+        #     fields=["address_title","address_type","address_line1","address_line2",
+        #             "city","state","country","pincode","email_id","phone","fax",
+        #             "is_primary_address","is_shipping_address","disabled","custom_note", "creation"],
+        #     order_by="is_primary_address DESC, creation ASC",
+        # )
 
         address_list = frappe.db.sql(
         """
