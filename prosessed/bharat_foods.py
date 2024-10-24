@@ -582,13 +582,26 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
             email_id = address_list[0]["email_id"]
 
 
-        contact_list = frappe.get_list(
-            "Contact",
-            filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                     ["Dynamic Link", "link_name", "=", customer_id],
-                     ["Dynamic Link", "parenttype", "=", "Contact"]],
-            fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact", "creation"],
-            order_by="is_primary_contact DESC, creation ASC",
+        # contact_list = frappe.get_list(
+        #     "Contact",
+        #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+        #              ["Dynamic Link", "link_name", "=", customer_id],
+        #              ["Dynamic Link", "parenttype", "=", "Contact"]],
+        #     fields=["full_name" , "phone", "mobile_no", "image", "is_primary_contact", "is_billing_contact", "creation"],
+        #     order_by="is_primary_contact DESC, creation ASC",
+        # )
+
+        contact_list = frappe.db.sql(
+        """
+            SELECT c.name c.full_name c.phone c.mobile_no c.image c.is_primary_contact c.is_billing_contact c.creation
+            FROM `tabContact` c
+            LEFT JOIN `tabDynamic Link` dl
+            ON c.name = dl.link_name
+            WHERE dl.link_doctype='Customer' AND
+			dl.link_name=%s  and
+			dl.parenttype='Contact'
+        """,(customer_id),
+            as_dict=1
         )
 
         phone = ''
@@ -640,14 +653,29 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
     customer_ids = [c['name'] for c in customer_list]
 
     # Fetch related addresses in a single query
-    address_list = frappe.get_list(
-        "Address",
-        filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                 ["Dynamic Link", "link_name", "in", customer_ids]],
-        fields=["link_name", "address_title", "address_type", "address_line1", "address_line2",
-                "city", "state", "country", "pincode", "email_id", "phone", "fax",
-                "is_primary_address", "is_shipping_address", "disabled", "custom_note", "creation"],
-        order_by="is_primary_address DESC, creation ASC"
+    # address_list = frappe.get_list(
+    #     "Address",
+    #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+    #              ["Dynamic Link", "link_name", "in", customer_ids]],
+    #     fields=["name", "address_title", "address_type", "address_line1", "address_line2",
+    #             "city", "state", "country", "pincode", "email_id", "phone", "fax",
+    #             "is_primary_address", "is_shipping_address", "disabled", "custom_note", "creation"],
+    #     order_by="is_primary_address DESC, creation ASC"
+    # )
+
+    address_list = frappe.db.sql(
+        """
+            SELECT
+                c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
+                c.is_primary_contact, c.is_billing_contact, c.creation
+            FROM `tabAddress` c
+            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+            WHERE dl.link_doctype = 'Customer'
+            AND dl.link_name IN %(customer_ids)s
+            AND dl.parenttype = 'Contact'
+        """,
+        {"customer_ids": tuple(customer_ids)},  # Convert customer_ids to a tuple for SQL IN clause
+        as_dict=1
     )
 
     # Group addresses by customer ID
@@ -656,19 +684,35 @@ def get_customer_lists(sales_person: str = None, customer_id: str = None, paymen
         address_by_customer[addr['link_name']].append(addr)
 
     # Fetch related contacts in a single query
-    contact_list = frappe.get_list(
-        "Contact",
-        filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
-                 ["Dynamic Link", "link_name", "in", customer_ids]],
-        fields=["link_name", "full_name", "phone", "mobile_no", "image", "is_primary_contact",
-                "is_billing_contact", "creation"],
-        order_by="is_primary_contact DESC, creation ASC"
+    # contact_list = frappe.get_list(
+    #     "Contact",
+    #     filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+    #              ["Dynamic Link", "link_name", "in", customer_ids]],
+    #     fields=["name", "full_name", "phone", "mobile_no", "image", "is_primary_contact",
+    #             "is_billing_contact", "creation"],
+    #     order_by="is_primary_contact DESC, creation ASC"
+    # )
+
+    contact_list = frappe.db.sql(
+        """
+            SELECT
+                c.name, dl.link_name, c.full_name, c.phone, c.mobile_no, c.image,
+                c.is_primary_contact, c.is_billing_contact, c.creation
+            FROM `tabContact` c
+            LEFT JOIN `tabDynamic Link` dl ON c.name = dl.link_name
+            WHERE dl.link_doctype = 'Customer'
+            AND dl.link_name IN %(customer_ids)s
+            AND dl.parenttype = 'Contact'
+        """,
+        {"customer_ids": tuple(customer_ids)},  # Convert customer_ids to a tuple for SQL IN clause
+        as_dict=1
     )
+
 
     # Group contacts by customer ID
     contact_by_customer = {customer_id: [] for customer_id in customer_ids}
     for contact in contact_list:
-        contact_by_customer[contact['link_name']].append(contact)
+            contact_by_customer[contact['link_name']].append(contact)
 
     # Fetch sales order counts in bulk
     sales_order_counts = frappe.db.get_all("Sales Order", filters={"customer": ["in", customer_ids]},
