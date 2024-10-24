@@ -609,3 +609,88 @@ def get_customer_list(sales_person:str=None, customer_id:str=None, payment_terms
         })
 
     return customers
+
+
+@frappe.whitelist()
+def get_customer_lists(sales_person: str = None, customer_id: str = None, payment_terms: str = None, limit_page_length: int = 20, limit_start: int = 0):
+    sales_person_name = frappe.utils.get_fullname(sales_person) if sales_person else None
+    customers = []
+    filters = [["disabled", "=", 0]]
+
+    if customer_id:
+        filters.append(["name", "=", customer_id])
+
+    if sales_person_name:
+        filters.append(["Sales Team", "sales_person", "=", sales_person_name])
+        filters.append(["Sales Team", "parenttype", "=", "Customer"])
+
+    if payment_terms:
+        filters.append(["payment_terms", "=", payment_terms])
+
+    fields = ["name", "customer_name", "customer_group", "customer_type", "payment_terms"]
+
+    # Fetch customer list with pagination
+    customer_list = frappe.db.get_list("Customer", filters=filters, fields=fields,
+                                       limit_start=limit_start, limit_page_length=limit_page_length)
+
+    # If no customers, return early
+    if not customer_list:
+        return []
+
+    customer_ids = [c['name'] for c in customer_list]
+
+    # Fetch related addresses in a single query
+    address_list = frappe.get_list(
+        "Address",
+        filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                 ["Dynamic Link", "link_name", "in", customer_ids]],
+        fields=["link_name", "address_title", "address_type", "address_line1", "address_line2",
+                "city", "state", "country", "pincode", "email_id", "phone", "fax",
+                "is_primary_address", "is_shipping_address", "disabled", "custom_note", "creation"],
+        order_by="is_primary_address DESC, creation ASC"
+    )
+
+    # Group addresses by customer ID
+    address_by_customer = {customer_id: [] for customer_id in customer_ids}
+    for addr in address_list:
+        address_by_customer[addr['link_name']].append(addr)
+
+    # Fetch related contacts in a single query
+    contact_list = frappe.get_list(
+        "Contact",
+        filters=[["Dynamic Link", "link_doctype", "=", "Customer"],
+                 ["Dynamic Link", "link_name", "in", customer_ids]],
+        fields=["link_name", "full_name", "phone", "mobile_no", "image", "is_primary_contact",
+                "is_billing_contact", "creation"],
+        order_by="is_primary_contact DESC, creation ASC"
+    )
+
+    # Group contacts by customer ID
+    contact_by_customer = {customer_id: [] for customer_id in customer_ids}
+    for contact in contact_list:
+        contact_by_customer[contact['link_name']].append(contact)
+
+    # Fetch sales order counts in bulk
+    sales_order_counts = frappe.db.get_all("Sales Order", filters={"customer": ["in", customer_ids]},
+                                           fields=["customer", "count(name) as total_so_count"],
+                                           group_by="customer")
+
+    so_count_by_customer = {so['customer']: so['total_so_count'] for so in sales_order_counts}
+
+    # Build the final customer list
+    for customer in customer_list:
+        customer_id = customer.get('name')
+
+        customers.append({
+            "customer_name": customer.get('customer_name', ''),
+            "customer_group": customer.get('customer_group', ''),
+            "phone_no": contact_by_customer[customer_id][0]['phone'] if contact_by_customer[customer_id] else '',
+            "email": address_by_customer[customer_id][0]['email_id'] if address_by_customer[customer_id] else '',
+            "customer_type": customer.get('customer_type', ''),
+            "address_list": address_by_customer.get(customer_id, []),
+            "contact_list": contact_by_customer.get(customer_id, []),
+            "payment_terms": customer.get('payment_terms', ''),
+            "total_so_count": so_count_by_customer.get(customer_id, 0),
+        })
+
+    return customers
